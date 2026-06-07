@@ -14,7 +14,89 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      articles: {
+        Row: {
+          conclusion: string | null
+          created_at: string
+          full_article: string
+          id: string
+          quiz: Json | null
+          sbi_notes: Json | null
+          summary: string | null
+          takeaways: Json | null
+          theme: string | null
+          title: string
+          tone: string | null
+          updated_at: string
+          user_id: string
+          vocabulary: Json | null
+        }
+        Insert: {
+          conclusion?: string | null
+          created_at?: string
+          full_article: string
+          id?: string
+          quiz?: Json | null
+          sbi_notes?: Json | null
+          summary?: string | null
+          takeaways?: Json | null
+          theme?: string | null
+          title: string
+          tone?: string | null
+          updated_at?: string
+          user_id: string
+          vocabulary?: Json | null
+        }
+        Update: {
+          conclusion?: string | null
+          created_at?: string
+          full_article?: string
+          id?: string
+          quiz?: Json | null
+          sbi_notes?: Json | null
+          summary?: string | null
+          takeaways?: Json | null
+          theme?: string | null
+          title?: string
+          tone?: string | null
+          updated_at?: string
+          user_id?: string
+          vocabulary?: Json | null
+        }
+        Relationships: []
+      }
+      reading_log: {
+        Row: {
+          article_id: string | null
+          created_at: string
+          id: string
+          read_date: string
+          user_id: string
+        }
+        Insert: {
+          article_id?: string | null
+          created_at?: string
+          id?: string
+          read_date?: string
+          user_id: string
+        }
+        Update: {
+          article_id?: string | null
+          created_at?: string
+          id?: string
+          read_date?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reading_log_article_id_fkey"
+            columns: ["article_id"]
+            isOneToOne: false
+            referencedRelation: "articles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
