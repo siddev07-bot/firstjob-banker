@@ -13,7 +13,7 @@ export const Route = createFileRoute("/_authenticated/app")({
   component: AppPage,
 });
 
-type Tab = "dashboard" | "generate" | "history" | "editorial" | "vocab" | "quiz";
+type Tab = "dashboard" | "generate" | "history" | "editorial" | "vocab" | "quiz" | "flashcards";
 
 function AppPage() {
   const nav = useNavigate();
