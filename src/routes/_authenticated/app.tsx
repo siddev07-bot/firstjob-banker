@@ -13,7 +13,7 @@ export const Route = createFileRoute("/_authenticated/app")({
   component: AppPage,
 });
 
-type Tab = "dashboard" | "generate" | "history" | "editorial" | "vocab" | "quiz";
+type Tab = "dashboard" | "generate" | "history" | "editorial" | "vocab" | "quiz" | "flashcards";
 
 function AppPage() {
   const nav = useNavigate();
@@ -78,6 +78,7 @@ function AppPage() {
           <button className={`fbh-tab ${tab === "editorial" ? "active" : ""}`} onClick={() => setTab("editorial")} disabled={!current}>📰 Editorial</button>
           <button className={`fbh-tab ${tab === "vocab" ? "active" : ""}`} onClick={() => setTab("vocab")} disabled={!current}>📚 Vocabulary</button>
           <button className={`fbh-tab ${tab === "quiz" ? "active" : ""}`} onClick={() => setTab("quiz")} disabled={!current}>📝 Quiz</button>
+          <button className={`fbh-tab ${tab === "flashcards" ? "active" : ""}`} onClick={() => setTab("flashcards")} disabled={!current}>🎴 Flashcards</button>
         </nav>
 
         {tab === "dashboard" && <DashboardView onOpen={openArticle} onGenerate={() => setTab("generate")} />}
@@ -86,6 +87,7 @@ function AppPage() {
         {tab === "editorial" && current && <EditorialView a={current} />}
         {tab === "vocab" && current && <VocabView a={current} />}
         {tab === "quiz" && current && <QuizView a={current} />}
+        {tab === "flashcards" && current && <FlashcardView a={current} />}
       </main>
     </div>
   );
@@ -472,6 +474,97 @@ function QuizView({ a }: { a: ArticlePackage }) {
           <button className="fbh-btn" onClick={prev} disabled={idx === 0}>← Previous</button>
           <button className="fbh-btn-primary" onClick={next} disabled={idx === a.quiz.length - 1}>Next →</button>
         </div>
+      </div>
+    </div>
+  );
+}
+
+/* ────────── FLASHCARDS ────────── */
+function FlashcardView({ a }: { a: ArticlePackage }) {
+  const [idx, setIdx] = useState(0);
+  const [flipped, setFlipped] = useState(false);
+  const [known, setKnown] = useState<Record<number, boolean>>({});
+  const words = a.vocabulary ?? [];
+  const v = words[idx];
+
+  useEffect(() => {
+    setFlipped(false);
+  }, [idx]);
+
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.code === "Space") { e.preventDefault(); setFlipped((f) => !f); }
+      if (e.code === "ArrowRight") next();
+      if (e.code === "ArrowLeft") prev();
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [words.length]);
+
+  const next = () => { setIdx((i) => Math.min(i + 1, words.length - 1)); };
+  const prev = () => { setIdx((i) => Math.max(0, i - 1)); };
+  const mark = (ok: boolean) => { setKnown({ ...known, [idx]: ok }); next(); };
+
+  if (!words.length) return <p style={{ color: "var(--ink4)" }}>No vocabulary available.</p>;
+
+  const mastered = Object.values(known).filter(Boolean).length;
+
+  return (
+    <div>
+      <div className="fbh-meta-row">
+        <span className="fbh-meta-badge">Flashcards</span>
+        <span className="fbh-meta-dot" />
+        <span>Card {idx + 1} of {words.length}</span>
+        <span className="fbh-meta-dot" />
+        <span>Mastered: {mastered}</span>
+      </div>
+
+      <div className="fbh-progress-bar"><div className="fbh-progress-fill" style={{ width: `${((idx + 1) / words.length) * 100}%` }} /></div>
+
+      <div className="fbh-flip-wrap" onClick={() => setFlipped(!flipped)} role="button" tabIndex={0}>
+        <div className={`fbh-flip-card ${flipped ? "flipped" : ""}`}>
+          <div className="fbh-flip-front">
+            <div className="fbh-flip-badge">WORD</div>
+            <div className="fbh-flip-word">{v.word}</div>
+            {v.pos && <div className="fbh-flip-pos">{v.pos}</div>}
+            <div className="fbh-flip-hint">Tap or press Space to flip</div>
+          </div>
+          <div className="fbh-flip-back">
+            <div className="fbh-flip-badge">MEANING</div>
+            {v.hindi && (
+              <div className="fbh-flip-hindi">{v.hindi}</div>
+            )}
+            {v.english && (
+              <div className="fbh-flip-meaning">{v.english}</div>
+            )}
+            {v.synonyms && (
+              <div style={{ marginTop: 10, fontSize: 13, color: "var(--ink4)" }}>
+                <span style={{ fontWeight: 700, color: "var(--ink3)" }}>Synonyms: </span>{v.synonyms}
+              </div>
+            )}
+            {v.usage && (
+              <div className="fbh-flip-usage">
+                <div style={{ fontSize: 10, fontWeight: 800, textTransform: "uppercase", letterSpacing: ".6px", color: "var(--teal)", marginBottom: 4 }}>Usage</div>
+                <em>{v.usage}</em>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+
+      <div style={{ display: "flex", justifyContent: "center", gap: 12, marginTop: 20, flexWrap: "wrap" }}>
+        <button className="fbh-btn" onClick={prev} disabled={idx === 0}>← Prev</button>
+        <button className="fbh-btn" onClick={() => setFlipped(!flipped)}>{flipped ? "🙈 Hide" : "👁 Reveal"}</button>
+        <button className="fbh-btn" onClick={next} disabled={idx === words.length - 1}>Next →</button>
+      </div>
+
+      <div style={{ display: "flex", justifyContent: "center", gap: 12, marginTop: 14 }}>
+        <button className="fbh-btn" style={{ borderColor: "var(--green)", color: "var(--green)" }} onClick={() => mark(true)}>
+          ✅ Know it
+        </button>
+        <button className="fbh-btn" style={{ borderColor: "var(--fbh-accent)", color: "var(--fbh-accent)" }} onClick={() => mark(false)}>
+          🔁 Review again
+        </button>
       </div>
     </div>
   );
