@@ -186,7 +186,7 @@ function GeneratorView({ onGenerated }: { onGenerated: (a: ArticlePackage) => vo
           quiz: pkg.quiz ?? [],
         },
       });
-      return saved as ArticlePackage;
+      return saved as unknown as ArticlePackage;
     },
     onSuccess: (a) => {
       toast.success("Editorial package ready!");
