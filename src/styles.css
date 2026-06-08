@@ -319,7 +319,7 @@
   transition: var(--tr);
 }
 .fbh-input:focus, .fbh-textarea:focus { outline: none; border-color: var(--fbh-accent); box-shadow: 0 0 0 3px rgba(192,57,43,.15); }
-.fbh-textarea { min-height: 240px; resize: vertical; font-family: var(--f-display); font-size: 15px; line-height: 1.6; }
+.fbh-textarea { min-height: 240px; resize: vertical; font-family: var(--f-display); font-size: 12px; line-height: 1.6; }
 
 .fbh-stat-card {
   background: linear-gradient(135deg, var(--paper) 0%, var(--paper2) 100%);
