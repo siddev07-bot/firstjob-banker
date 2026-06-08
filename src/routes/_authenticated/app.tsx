@@ -72,13 +72,13 @@ function AppPage() {
 
       <main className="fbh-wrap">
         <nav className="fbh-tabs">
-          <button className={`fbh-tab ${tab === "dashboard" ? "active" : ""}`} onClick={() => setTab("dashboard")}>📊 Dashboard</button>
-          <button className={`fbh-tab ${tab === "generate" ? "active" : ""}`} onClick={() => setTab("generate")}>🤖 AI Generator</button>
-          <button className={`fbh-tab ${tab === "history" ? "active" : ""}`} onClick={() => setTab("history")}>🗂️ History</button>
-          <button className={`fbh-tab ${tab === "editorial" ? "active" : ""}`} onClick={() => setTab("editorial")} disabled={!current}>📰 Editorial</button>
-          <button className={`fbh-tab ${tab === "vocab" ? "active" : ""}`} onClick={() => setTab("vocab")} disabled={!current}>📚 Vocabulary</button>
-          <button className={`fbh-tab ${tab === "quiz" ? "active" : ""}`} onClick={() => setTab("quiz")} disabled={!current}>📝 Quiz</button>
-          <button className={`fbh-tab ${tab === "flashcards" ? "active" : ""}`} onClick={() => setTab("flashcards")} disabled={!current}>🎴 Flashcards</button>
+          <button className={`fbh-tab text-lg ${tab === "dashboard" ? "active" : ""}`} onClick={() => setTab("dashboard")}>📊 Dashboard</button>
+          <button className={`fbh-tab text-lg ${tab === "generate" ? "active" : ""}`} onClick={() => setTab("generate")}>🤖 AI Generator</button>
+          <button className={`fbh-tab text-lg ${tab === "history" ? "active" : ""}`} onClick={() => setTab("history")}>🗂️ History</button>
+          <button className={`fbh-tab text-lg ${tab === "editorial" ? "active" : ""}`} onClick={() => setTab("editorial")} disabled={!current}>📰 Editorial</button>
+          <button className={`fbh-tab text-lg ${tab === "vocab" ? "active" : ""}`} onClick={() => setTab("vocab")} disabled={!current}>📚 Vocabulary</button>
+          <button className={`fbh-tab text-lg ${tab === "quiz" ? "active" : ""}`} onClick={() => setTab("quiz")} disabled={!current}>📝 Quiz</button>
+          <button className={`fbh-tab text-lg ${tab === "flashcards" ? "active" : ""}`} onClick={() => setTab("flashcards")} disabled={!current}>🎴 Flashcards</button>
         </nav>
 
         {tab === "dashboard" && <DashboardView onOpen={openArticle} onGenerate={() => setTab("generate")} />}
