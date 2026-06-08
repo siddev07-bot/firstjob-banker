@@ -481,11 +481,29 @@ function QuizView({ a }: { a: ArticlePackage }) {
 
 /* ────────── FLASHCARDS ────────── */
 function FlashcardView({ a }: { a: ArticlePackage }) {
+  const allWords = a.vocabulary ?? [];
   const [idx, setIdx] = useState(0);
   const [flipped, setFlipped] = useState(false);
   const [known, setKnown] = useState<Record<number, boolean>>({});
-  const words = a.vocabulary ?? [];
-  const v = words[idx];
+  const [search, setSearch] = useState("");
+  const [posFilter, setPosFilter] = useState("");
+
+  const filteredWords = useMemo(() => {
+    return allWords.filter((v) => {
+      if (posFilter && v.pos !== posFilter) return false;
+      if (search) {
+        const q = search.toLowerCase();
+        const hay = `${v.word} ${v.hindi ?? ""} ${v.english ?? ""} ${v.synonyms ?? ""}`.toLowerCase();
+        if (!hay.includes(q)) return false;
+      }
+      return true;
+    });
+  }, [allWords, search, posFilter]);
+
+  useEffect(() => {
+    setIdx(0);
+    setFlipped(false);
+  }, [search, posFilter]);
 
   useEffect(() => {
     setFlipped(false);
@@ -499,73 +517,112 @@ function FlashcardView({ a }: { a: ArticlePackage }) {
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [words.length]);
+  }, [filteredWords.length]);
 
-  const next = () => { setIdx((i) => Math.min(i + 1, words.length - 1)); };
+  const next = () => { setIdx((i) => Math.min(i + 1, filteredWords.length - 1)); };
   const prev = () => { setIdx((i) => Math.max(0, i - 1)); };
   const mark = (ok: boolean) => { setKnown({ ...known, [idx]: ok }); next(); };
 
-  if (!words.length) return <p style={{ color: "var(--ink4)" }}>No vocabulary available.</p>;
+  const posOptions = useMemo(() => {
+    const set = new Set<string>();
+    allWords.forEach((v) => { if (v.pos) set.add(v.pos); });
+    return Array.from(set).sort();
+  }, [allWords]);
+
+  if (!allWords.length) return <p style={{ color: "var(--ink4)" }}>No vocabulary available.</p>;
 
   const mastered = Object.values(known).filter(Boolean).length;
+  const v = filteredWords[idx];
 
   return (
     <div>
       <div className="fbh-meta-row">
         <span className="fbh-meta-badge">Flashcards</span>
         <span className="fbh-meta-dot" />
-        <span>Card {idx + 1} of {words.length}</span>
+        <span>Card {Math.min(idx + 1, filteredWords.length)} of {filteredWords.length}</span>
         <span className="fbh-meta-dot" />
         <span>Mastered: {mastered}</span>
       </div>
 
-      <div className="fbh-progress-bar"><div className="fbh-progress-fill" style={{ width: `${((idx + 1) / words.length) * 100}%` }} /></div>
+      <div style={{ display: "flex", gap: 10, marginBottom: 14, flexWrap: "wrap" }}>
+        <input
+          className="fbh-input"
+          placeholder="🔍 Search word, meaning, synonym…"
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          style={{ flex: 1, minWidth: 200 }}
+        />
+        <select
+          className="fbh-input"
+          value={posFilter}
+          onChange={(e) => setPosFilter(e.target.value)}
+          style={{ maxWidth: 180 }}
+        >
+          <option value="">All types</option>
+          {posOptions.map((p) => (
+            <option key={p} value={p}>{p.charAt(0).toUpperCase() + p.slice(1)}</option>
+          ))}
+        </select>
+        {(search || posFilter) && (
+          <button className="fbh-btn" onClick={() => { setSearch(""); setPosFilter(""); }}>Clear</button>
+        )}
+      </div>
 
-      <div className="fbh-flip-wrap" onClick={() => setFlipped(!flipped)} role="button" tabIndex={0}>
-        <div className={`fbh-flip-card ${flipped ? "flipped" : ""}`}>
-          <div className="fbh-flip-front">
-            <div className="fbh-flip-badge">WORD</div>
-            <div className="fbh-flip-word">{v.word}</div>
-            {v.pos && <div className="fbh-flip-pos">{v.pos}</div>}
-            <div className="fbh-flip-hint">Tap or press Space to flip</div>
-          </div>
-          <div className="fbh-flip-back">
-            <div className="fbh-flip-badge">MEANING</div>
-            {v.hindi && (
-              <div className="fbh-flip-hindi">{v.hindi}</div>
-            )}
-            {v.english && (
-              <div className="fbh-flip-meaning">{v.english}</div>
-            )}
-            {v.synonyms && (
-              <div style={{ marginTop: 10, fontSize: 13, color: "var(--ink4)" }}>
-                <span style={{ fontWeight: 700, color: "var(--ink3)" }}>Synonyms: </span>{v.synonyms}
-              </div>
-            )}
-            {v.usage && (
-              <div className="fbh-flip-usage">
-                <div style={{ fontSize: 10, fontWeight: 800, textTransform: "uppercase", letterSpacing: ".6px", color: "var(--teal)", marginBottom: 4 }}>Usage</div>
-                <em>{v.usage}</em>
-              </div>
-            )}
-          </div>
+      {filteredWords.length === 0 ? (
+        <div className="fbh-glass" style={{ padding: 32, textAlign: "center", color: "var(--ink4)" }}>
+          No words match your filters.
         </div>
-      </div>
+      ) : (
+        <>
+          <div className="fbh-progress-bar"><div className="fbh-progress-fill" style={{ width: `${((idx + 1) / filteredWords.length) * 100}%` }} /></div>
 
-      <div style={{ display: "flex", justifyContent: "center", gap: 12, marginTop: 20, flexWrap: "wrap" }}>
-        <button className="fbh-btn" onClick={prev} disabled={idx === 0}>← Prev</button>
-        <button className="fbh-btn" onClick={() => setFlipped(!flipped)}>{flipped ? "🙈 Hide" : "👁 Reveal"}</button>
-        <button className="fbh-btn" onClick={next} disabled={idx === words.length - 1}>Next →</button>
-      </div>
+          <div className="fbh-flip-wrap" onClick={() => setFlipped(!flipped)} role="button" tabIndex={0}>
+            <div className={`fbh-flip-card ${flipped ? "flipped" : ""}`}>
+              <div className="fbh-flip-front">
+                <div className="fbh-flip-badge">WORD</div>
+                <div className="fbh-flip-word">{v.word}</div>
+                {v.pos && <div className="fbh-flip-pos">{v.pos}</div>}
+                <div className="fbh-flip-hint">Tap or press Space to flip</div>
+              </div>
+              <div className="fbh-flip-back">
+                <div className="fbh-flip-badge">MEANING</div>
+                {v.hindi && (
+                  <div className="fbh-flip-hindi">{v.hindi}</div>
+                )}
+                {v.english && (
+                  <div className="fbh-flip-meaning">{v.english}</div>
+                )}
+                {v.synonyms && (
+                  <div style={{ marginTop: 10, fontSize: 13, color: "var(--ink4)" }}>
+                    <span style={{ fontWeight: 700, color: "var(--ink3)" }}>Synonyms: </span>{v.synonyms}
+                  </div>
+                )}
+                {v.usage && (
+                  <div className="fbh-flip-usage">
+                    <div style={{ fontSize: 10, fontWeight: 800, textTransform: "uppercase", letterSpacing: ".6px", color: "var(--teal)", marginBottom: 4 }}>Usage</div>
+                    <em>{v.usage}</em>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
 
-      <div style={{ display: "flex", justifyContent: "center", gap: 12, marginTop: 14 }}>
-        <button className="fbh-btn" style={{ borderColor: "var(--green)", color: "var(--green)" }} onClick={() => mark(true)}>
-          ✅ Know it
-        </button>
-        <button className="fbh-btn" style={{ borderColor: "var(--fbh-accent)", color: "var(--fbh-accent)" }} onClick={() => mark(false)}>
-          🔁 Review again
-        </button>
-      </div>
+          <div style={{ display: "flex", justifyContent: "center", gap: 12, marginTop: 20, flexWrap: "wrap" }}>
+            <button className="fbh-btn" onClick={prev} disabled={idx === 0}>← Prev</button>
+            <button className="fbh-btn" onClick={() => setFlipped(!flipped)}>{flipped ? "🙈 Hide" : "👁 Reveal"}</button>
+            <button className="fbh-btn" onClick={next} disabled={idx === filteredWords.length - 1}>Next →</button>
+          </div>
+
+          <div style={{ display: "flex", justifyContent: "center", gap: 12, marginTop: 14 }}>
+            <button className="fbh-btn" style={{ borderColor: "var(--green)", color: "var(--green)" }} onClick={() => mark(true)}>
+              ✅ Know it
+            </button>
+            <button className="fbh-btn" style={{ borderColor: "var(--fbh-accent)", color: "var(--fbh-accent)" }} onClick={() => mark(false)}>
+              🔁 Review again
+            </button>
+          </div>
+        </>
+      )}
     </div>
   );
 }
