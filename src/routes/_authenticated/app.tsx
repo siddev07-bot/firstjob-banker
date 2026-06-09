@@ -201,6 +201,8 @@ function GeneratorView({ onGenerated }: { onGenerated: (a: ArticlePackage) => vo
     onError: (e: any) => { setProgress(""); toast.error(e.message ?? "Generation failed"); },
   });
 
+  const [showSample, setShowSample] = useState(false);
+
   return (
     <div>
       <div className="fbh-meta-row">
@@ -219,10 +221,15 @@ function GeneratorView({ onGenerated }: { onGenerated: (a: ArticlePackage) => vo
             {gen.isPending ? <span className="fbh-spinner" /> : "✨"}
             {gen.isPending ? "Generating…" : "Generate Editorial Package"}
           </button>
+          <button type="button" className="fbh-btn" onClick={() => setShowSample((s) => !s)}>
+            {showSample ? "Hide" : "📖 View"} Sample Breakdown
+          </button>
           {progress && <span style={{ color: "var(--ink3)", fontSize: 13 }}>{progress}</span>}
           <span style={{ marginLeft: "auto", fontSize: 12, color: "var(--ink4)" }}>{text.trim().split(/\s+/).filter(Boolean).length} words</span>
         </div>
       </div>
+
+      {showSample && <SampleBreakdown />}
 
       <div className="fbh-section-title">📦 What you'll get</div>
       <div className="fbh-info-cards">
@@ -237,6 +244,58 @@ function GeneratorView({ onGenerated }: { onGenerated: (a: ArticlePackage) => vo
             <div className="fbh-info-val">{v}</div>
           </div>
         ))}
+      </div>
+    </div>
+  );
+}
+
+function SampleBreakdown() {
+  const vocab: [string, string, string][] = [
+    ["Disintermediation", "The removal of intermediaries (banks) from financial transactions.", "Bypassing, Cutting out the middleman"],
+    ["Frictionless", "Smooth, occurring without difficulty or resistance.", "Seamless, Effortless"],
+    ["Double-edged sword", "Something that has both positive and negative consequences.", "Mixed blessing"],
+    ["Wholesale funding", "Funds raised by banks from large institutional sources rather than retail deposits.", "Institutional borrowing"],
+    ["Holding limits", "Caps placed on the maximum amount of CBDC an individual can hold.", "Ceilings, Caps"],
+  ];
+  return (
+    <div className="fbh-glass" style={{ padding: 22, marginBottom: 22 }}>
+      <h3 style={{ fontFamily: "var(--f-display)", fontSize: 18, fontWeight: 700, marginBottom: 4 }}>📖 Sample Editorial Breakdown</h3>
+      <p style={{ fontSize: 12, color: "var(--ink4)", marginBottom: 14 }}>Reference format — this is the depth and structure you'll get from each generation.</p>
+
+      <div style={{ display: "grid", gap: 14, fontSize: 13, lineHeight: 1.55 }}>
+        <div>
+          <div className="fbh-info-label">Topic</div>
+          <div>Digital Currency Adoption and Banking Disintermediation</div>
+        </div>
+        <div>
+          <div className="fbh-info-label">Central Idea</div>
+          <div>While Central Bank Digital Currencies (CBDCs) enhance payment efficiency, rapid retail adoption risks pulling deposits away from commercial banks, altering monetary policy transmission and bank stability.</div>
+        </div>
+        <div>
+          <div className="fbh-info-label">Key Vocabulary</div>
+          <table style={{ width: "100%", borderCollapse: "collapse", marginTop: 6 }}>
+            <thead>
+              <tr style={{ textAlign: "left", fontSize: 11, color: "var(--ink4)", textTransform: "uppercase", letterSpacing: ".5px" }}>
+                <th style={{ padding: "6px 8px", borderBottom: "1px solid var(--line)" }}>Word</th>
+                <th style={{ padding: "6px 8px", borderBottom: "1px solid var(--line)" }}>Meaning</th>
+                <th style={{ padding: "6px 8px", borderBottom: "1px solid var(--line)" }}>Synonyms</th>
+              </tr>
+            </thead>
+            <tbody>
+              {vocab.map(([w, m, s]) => (
+                <tr key={w}>
+                  <td style={{ padding: "6px 8px", borderBottom: "1px solid var(--line)", fontWeight: 600 }}>{w}</td>
+                  <td style={{ padding: "6px 8px", borderBottom: "1px solid var(--line)" }}>{m}</td>
+                  <td style={{ padding: "6px 8px", borderBottom: "1px solid var(--line)", color: "var(--ink3)" }}>{s}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+        <div>
+          <div className="fbh-info-label">3-Sentence Précis</div>
+          <div>The introduction of retail CBDCs aims to modernize the financial ecosystem by providing a secure, digitized alternative to physical cash. However, this shift threatens the stable deposit base of commercial banks, potentially increasing their reliance on costlier wholesale funding. Consequently, policymakers must introduce holding limits to balance technological innovation with banking sector stability.</div>
+        </div>
       </div>
     </div>
   );
