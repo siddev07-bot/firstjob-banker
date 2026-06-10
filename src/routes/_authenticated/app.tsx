@@ -55,10 +55,10 @@ function AppPage() {
       </div>
       <header className="fbh-header">
         <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-          <div className="fbh-logo-badge">FB</div>
+          <div className="fbh-logo-badge">FJ</div>
           <div style={{ lineHeight: 1.15 }}>
-            <strong style={{ display: "block", fontFamily: "var(--f-display)", fontSize: 19, fontWeight: 700 }}>Future Banker Hub</strong>
-            <small style={{ fontSize: 10, fontWeight: 600, color: "var(--ink4)", textTransform: "uppercase", letterSpacing: ".8px" }}>AI Editorial Learning Platform</small>
+            <strong style={{ display: "block", fontFamily: "var(--f-display)", fontSize: 19, fontWeight: 700 }}>FirstJob Banker</strong>
+            <small style={{ fontSize: 10, fontWeight: 600, color: "var(--ink4)", textTransform: "uppercase", letterSpacing: ".8px" }}>From Aspirant to Banker</small>
           </div>
         </div>
         <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
