@@ -52,8 +52,9 @@ export const generateEditorialPackage = createServerFn({ method: "POST" })
     if (resp.status === 429) throw new Error("Rate limit exceeded. Please wait a moment and try again.");
     if (resp.status === 402) throw new Error("AI credits exhausted. Please add credits in your workspace.");
     if (!resp.ok) {
-      const text = await resp.text();
-      throw new Error(`AI request failed: ${resp.status} ${text.slice(0, 200)}`);
+      const text = await resp.text().catch(() => "");
+      console.error("[ai.generateEditorialPackage] gateway error", resp.status, text);
+      throw new Error("AI request failed. Please try again.");
     }
 
     const json = await resp.json();
