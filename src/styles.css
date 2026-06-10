@@ -62,25 +62,25 @@
 
   /* shadcn semantic tokens */
   --radius: 0.625rem;
-  --background: #fafaf7;
-  --foreground: #1a1a2e;
+  --background: #ffffff;
+  --foreground: #0F172A;
   --card: #ffffff;
-  --card-foreground: #1a1a2e;
+  --card-foreground: #0F172A;
   --popover: #ffffff;
-  --popover-foreground: #1a1a2e;
-  --primary: #c0392b;
+  --popover-foreground: #0F172A;
+  --primary: #0F172A;
   --primary-foreground: #ffffff;
-  --secondary: #f2f2ed;
-  --secondary-foreground: #1a1a2e;
-  --muted: #f2f2ed;
-  --muted-foreground: #555570;
-  --accent: #f2f2ed;
-  --accent-foreground: #1a1a2e;
-  --destructive: #c0392b;
+  --secondary: #f1f5f9;
+  --secondary-foreground: #0F172A;
+  --muted: #f1f5f9;
+  --muted-foreground: #475569;
+  --accent: #F59E0B;
+  --accent-foreground: #0F172A;
+  --destructive: #dc2626;
   --destructive-foreground: #ffffff;
-  --border: #e0e0d4;
-  --input: #e0e0d4;
-  --ring: #c0392b;
+  --border: #e2e8f0;
+  --input: #e2e8f0;
+  --ring: #F59E0B;
 }
 
 .dark {
