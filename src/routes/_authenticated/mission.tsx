@@ -129,7 +129,7 @@ function HomeView({ onOpen, onNew }: { onOpen: (m: Mission) => void; onNew: () =
                   {m.mission_date} · {m.topic || "—"} · {m.difficulty || "—"} · {done}/{SECTIONS.length} done
                 </div>
               </div>
-              <button className="fbh-btn-primary" onClick={async () => onOpen((await getFn({ data: { id: m.id } })) as Mission)}>Open</button>
+              <button className="fbh-btn-primary" onClick={async () => onOpen((await getFn({ data: { id: m.id } })) as unknown as Mission)}>Open</button>
               <button className="fbh-btn" onClick={() => remove(m.id)}>Delete</button>
             </div>
           );
