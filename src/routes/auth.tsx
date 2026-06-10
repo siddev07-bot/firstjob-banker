@@ -6,7 +6,7 @@ import { toast } from "sonner";
 
 export const Route = createFileRoute("/auth")({
   ssr: false,
-  head: () => ({ meta: [{ title: "Sign in — Future Banker Hub" }] }),
+  head: () => ({ meta: [{ title: "Sign in — FirstJob Banker" }] }),
   component: AuthPage,
 });
 
@@ -59,10 +59,10 @@ function AuthPage() {
     <div className="min-h-screen flex items-center justify-center px-4" style={{ background: "linear-gradient(135deg, var(--paper) 0%, var(--paper2) 100%)" }}>
       <div className="fbh-glass w-full max-w-md p-8">
         <div className="flex items-center gap-3 mb-6">
-          <div className="fbh-logo-badge">FB</div>
+          <div className="fbh-logo-badge">FJ</div>
           <div>
-            <div style={{ fontFamily: "var(--f-display)", fontWeight: 700, fontSize: 20, color: "var(--ink)" }}>Future Banker Hub</div>
-            <div style={{ fontSize: 11, color: "var(--ink4)", textTransform: "uppercase", letterSpacing: ".8px" }}>AI Editorial Platform</div>
+            <div style={{ fontFamily: "var(--f-display)", fontWeight: 700, fontSize: 20, color: "var(--ink)" }}>FirstJob Banker</div>
+            <div style={{ fontSize: 11, color: "var(--ink4)", textTransform: "uppercase", letterSpacing: ".8px" }}>From Aspirant to Banker</div>
           </div>
         </div>
 

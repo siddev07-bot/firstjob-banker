@@ -31,7 +31,7 @@ function newPdf(title: string) {
   doc.setFont("helvetica", "normal");
   doc.setFontSize(10);
   doc.setTextColor(120);
-  doc.text("Future Banker Hub — " + new Date().toLocaleDateString(), 40, 50 + lines.length * 22 + 10);
+  doc.text("FirstJob Banker — " + new Date().toLocaleDateString(), 40, 50 + lines.length * 22 + 10);
   doc.setTextColor(0);
   return { doc, y: 50 + lines.length * 22 + 36 };
 }

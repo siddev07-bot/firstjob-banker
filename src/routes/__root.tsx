@@ -45,8 +45,8 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Future Banker Hub — AI Editorial Platform" },
-      { name: "description", content: "AI-powered editorial analysis & vocabulary platform for SBI PO and IBPS aspirants." },
+      { title: "FirstJob Banker — From Aspirant to Banker" },
+      { name: "description", content: "FirstJob Banker — From Aspirant to Banker. Professional banking exam prep for SBI PO and IBPS aspirants." },
     ],
     links: [
       { rel: "preconnect", href: "https://fonts.googleapis.com" },

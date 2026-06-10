@@ -55,10 +55,10 @@ function AppPage() {
       </div>
       <header className="fbh-header">
         <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-          <div className="fbh-logo-badge">FB</div>
+          <div className="fbh-logo-badge">FJ</div>
           <div style={{ lineHeight: 1.15 }}>
-            <strong style={{ display: "block", fontFamily: "var(--f-display)", fontSize: 19, fontWeight: 700 }}>Future Banker Hub</strong>
-            <small style={{ fontSize: 10, fontWeight: 600, color: "var(--ink4)", textTransform: "uppercase", letterSpacing: ".8px" }}>AI Editorial Learning Platform</small>
+            <strong style={{ display: "block", fontFamily: "var(--f-display)", fontSize: 19, fontWeight: 700 }}>FirstJob Banker</strong>
+            <small style={{ fontSize: 10, fontWeight: 600, color: "var(--ink4)", textTransform: "uppercase", letterSpacing: ".8px" }}>From Aspirant to Banker</small>
           </div>
         </div>
         <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
@@ -135,7 +135,7 @@ function DashboardView({ onOpen, onGenerate }: { onOpen: (a: ArticlePackage) => 
             <XAxis dataKey="date" stroke="var(--ink4)" fontSize={11} />
             <YAxis stroke="var(--ink4)" fontSize={11} allowDecimals={false} />
             <Tooltip contentStyle={{ background: "var(--paper)", border: "1px solid var(--border-c)", borderRadius: 8 }} />
-            <Line type="monotone" dataKey="count" stroke="#c0392b" strokeWidth={2.5} dot={{ r: 3, fill: "#c0392b" }} />
+            <Line type="monotone" dataKey="count" stroke="#F59E0B" strokeWidth={2.5} dot={{ r: 3, fill: "#F59E0B" }} />
           </LineChart>
         </ResponsiveContainer>
       </div>
@@ -371,13 +371,13 @@ function EditorialView({ a }: { a: ArticlePackage }) {
         <span className="fbh-meta-dot" />
         <span>{a.created_at ? new Date(a.created_at).toLocaleDateString() : ""}</span>
         <span className="fbh-meta-dot" />
-        <span>Future Banker Hub</span>
+        <span>FirstJob Banker</span>
       </div>
 
       <div className="fbh-article-header">
         <div className="fbh-article-label">📰 Editorial Vocabulary</div>
         <h1>{a.title}</h1>
-        <p style={{ fontSize: 13, color: "var(--ink3)" }}>By Future Banker Hub</p>
+        <p style={{ fontSize: 13, color: "var(--ink3)" }}>By FirstJob Banker</p>
       </div>
 
       {(a.theme || a.tone) && (
@@ -508,7 +508,7 @@ function QuizView({ a }: { a: ArticlePackage }) {
       </div>
 
       <div className="fbh-glass" style={{ padding: 22 }}>
-        <div style={{ display: "inline-flex", alignItems: "center", gap: 6, fontSize: 11, fontWeight: 800, textTransform: "uppercase", letterSpacing: ".5px", color: "var(--fbh-accent)", background: "rgba(192,57,43,.08)", padding: "4px 10px", borderRadius: 20, marginBottom: 12 }}>
+        <div style={{ display: "inline-flex", alignItems: "center", gap: 6, fontSize: 11, fontWeight: 800, textTransform: "uppercase", letterSpacing: ".5px", color: "var(--fbh-accent)", background: "rgba(245,158,11,.08)", padding: "4px 10px", borderRadius: 20, marginBottom: 12 }}>
           {q!.type.toUpperCase()} · Q{idx + 1}
         </div>
         <div style={{ fontFamily: "var(--f-display)", fontSize: 17, fontWeight: 600, color: "var(--ink)", lineHeight: 1.6, marginBottom: 16 }}>{q!.question}</div>
