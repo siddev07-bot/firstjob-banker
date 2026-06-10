@@ -65,6 +65,72 @@ export type Database = {
         }
         Relationships: []
       }
+      daily_missions: {
+        Row: {
+          cloze: Json
+          created_at: string
+          difficulty: string | null
+          error_detection: Json
+          grammar_notes: Json
+          id: string
+          key_points: Json
+          mission_date: string
+          progress: Json
+          rc_mains: Json
+          rc_prelims: Json
+          sentence_improvement: Json
+          source_text: string
+          summary: string | null
+          title: string
+          topic: string | null
+          updated_at: string
+          user_id: string
+          vocabulary: Json
+        }
+        Insert: {
+          cloze?: Json
+          created_at?: string
+          difficulty?: string | null
+          error_detection?: Json
+          grammar_notes?: Json
+          id?: string
+          key_points?: Json
+          mission_date?: string
+          progress?: Json
+          rc_mains?: Json
+          rc_prelims?: Json
+          sentence_improvement?: Json
+          source_text: string
+          summary?: string | null
+          title: string
+          topic?: string | null
+          updated_at?: string
+          user_id: string
+          vocabulary?: Json
+        }
+        Update: {
+          cloze?: Json
+          created_at?: string
+          difficulty?: string | null
+          error_detection?: Json
+          grammar_notes?: Json
+          id?: string
+          key_points?: Json
+          mission_date?: string
+          progress?: Json
+          rc_mains?: Json
+          rc_prelims?: Json
+          sentence_improvement?: Json
+          source_text?: string
+          summary?: string | null
+          title?: string
+          topic?: string | null
+          updated_at?: string
+          user_id?: string
+          vocabulary?: Json
+        }
+        Relationships: []
+      }
       reading_log: {
         Row: {
           article_id: string | null
