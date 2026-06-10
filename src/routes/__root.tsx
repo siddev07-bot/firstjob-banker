@@ -45,8 +45,16 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "FirstJob Banker — From Aspirant to Banker" },
-      { name: "description", content: "FirstJob Banker — From Aspirant to Banker. Professional banking exam prep for SBI PO and IBPS aspirants." },
+      { title: "FirstJob Banker — Banking Exam Preparation Platform" },
+      { name: "description", content: "Master SBI PO, IBPS, RBI and other banking exams with editorials, vocabulary, quizzes, PYQs, current affairs and performance tracking." },
+      { property: "og:title", content: "FirstJob Banker — Banking Exam Preparation Platform" },
+      { name: "twitter:title", content: "FirstJob Banker — Banking Exam Preparation Platform" },
+      { property: "og:description", content: "Master SBI PO, IBPS, RBI and other banking exams with editorials, vocabulary, quizzes, PYQs, current affairs and performance tracking." },
+      { name: "twitter:description", content: "Master SBI PO, IBPS, RBI and other banking exams with editorials, vocabulary, quizzes, PYQs, current affairs and performance tracking." },
+      { property: "og:image", content: "https://storage.googleapis.com/gpt-engineer-file-uploads/attachments/og-images/bdf60be1-9ec8-4f21-8c22-13115dcda342" },
+      { name: "twitter:image", content: "https://storage.googleapis.com/gpt-engineer-file-uploads/attachments/og-images/bdf60be1-9ec8-4f21-8c22-13115dcda342" },
+      { name: "twitter:card", content: "summary_large_image" },
+      { property: "og:type", content: "website" },
     ],
     links: [
       { rel: "preconnect", href: "https://fonts.googleapis.com" },
