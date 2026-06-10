@@ -183,9 +183,10 @@ export const updateSectionProgress = createServerFn({ method: "POST" })
     const { data: row, error: getErr } = await supabase
       .from("daily_missions").select("progress").eq("id", data.id).single();
     if (getErr) logAndThrow("update progress", getErr);
-    const next = { ...((row?.progress as Record<string, unknown>) ?? {}), [data.section]: data.progress };
+    const prev = (row?.progress ?? {}) as Record<string, unknown>;
+    const next = { ...prev, [data.section]: data.progress };
     const { error } = await supabase
-      .from("daily_missions").update({ progress: next }).eq("id", data.id);
+      .from("daily_missions").update({ progress: next as never }).eq("id", data.id);
     if (error) logAndThrow("update progress", error);
-    return { ok: true, progress: next };
+    return { ok: true };
   });
