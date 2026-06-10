@@ -32,6 +32,11 @@ const SavePayload = z.object({
   quiz: z.array(QuizQ).default([]),
 });
 
+function logAndThrow(op: string, error: unknown): never {
+  console.error(`[articles.${op}]`, error);
+  throw new Error(`Unable to ${op}. Please try again.`);
+}
+
 export const saveArticle = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((data: unknown) => SavePayload.parse(data))
@@ -42,7 +47,7 @@ export const saveArticle = createServerFn({ method: "POST" })
       .insert({ ...data, user_id: userId })
       .select()
       .single();
-    if (error) throw new Error(error.message);
+    if (error) logAndThrow("save article", error);
     await supabase.from("reading_log").insert({ user_id: userId, article_id: row.id });
     return row;
   });
@@ -54,7 +59,7 @@ export const listArticles = createServerFn({ method: "GET" })
       .from("articles")
       .select("id,title,summary,created_at,vocabulary,quiz")
       .order("created_at", { ascending: false });
-    if (error) throw new Error(error.message);
+    if (error) logAndThrow("load articles", error);
     return data ?? [];
   });
 
@@ -64,7 +69,7 @@ export const getArticle = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const { data: row, error } = await context.supabase
       .from("articles").select("*").eq("id", data.id).single();
-    if (error) throw new Error(error.message);
+    if (error) logAndThrow("load article", error);
     return row;
   });
 
@@ -73,7 +78,7 @@ export const deleteArticle = createServerFn({ method: "POST" })
   .inputValidator((d: unknown) => z.object({ id: z.string().uuid() }).parse(d))
   .handler(async ({ data, context }) => {
     const { error } = await context.supabase.from("articles").delete().eq("id", data.id);
-    if (error) throw new Error(error.message);
+    if (error) logAndThrow("delete article", error);
     return { ok: true };
   });
 
@@ -84,7 +89,7 @@ export const updateArticle = createServerFn({ method: "POST" })
     const { id, ...patch } = data;
     const { data: row, error } = await context.supabase
       .from("articles").update(patch).eq("id", id).select().single();
-    if (error) throw new Error(error.message);
+    if (error) logAndThrow("update article", error);
     return row;
   });
 
