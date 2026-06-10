@@ -30,15 +30,15 @@
 }
 
 :root {
-  --ink:       #1a1a2e;
-  --ink2:      #2d2d44;
-  --ink3:      #555570;
-  --ink4:      #8888aa;
-  --paper:     #fafaf7;
-  --paper2:    #f2f2ed;
-  --paper3:    #e8e8e0;
-  --fbh-accent:#c0392b;
-  --accent2:   #e74c3c;
+  --ink:       #0F172A;
+  --ink2:      #1e293b;
+  --ink3:      #475569;
+  --ink4:      #94a3b8;
+  --paper:     #ffffff;
+  --paper2:    #f8fafc;
+  --paper3:    #f1f5f9;
+  --fbh-accent:#0F172A;
+  --accent2:   #F59E0B;
   --gold:      #b8860b;
   --gold2:     #d4a017;
   --blue:      #1a56db;
