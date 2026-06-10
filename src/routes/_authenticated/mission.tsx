@@ -208,7 +208,7 @@ function PlayView({ mission, onChange, onExit }: { mission: Mission; onChange: (
   const [section, setSection] = useState<SectionKey | null>(null);
   const getFn = useServerFn(getDailyMission);
   const refresh = async () => {
-    const fresh = (await getFn({ data: { id: mission.id } })) as Mission;
+    const fresh = (await getFn({ data: { id: mission.id } })) as unknown as Mission;
     onChange(fresh);
   };
 
