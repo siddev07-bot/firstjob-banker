@@ -371,13 +371,13 @@ function EditorialView({ a }: { a: ArticlePackage }) {
         <span className="fbh-meta-dot" />
         <span>{a.created_at ? new Date(a.created_at).toLocaleDateString() : ""}</span>
         <span className="fbh-meta-dot" />
-        <span>Future Banker Hub</span>
+        <span>FirstJob Banker</span>
       </div>
 
       <div className="fbh-article-header">
         <div className="fbh-article-label">📰 Editorial Vocabulary</div>
         <h1>{a.title}</h1>
-        <p style={{ fontSize: 13, color: "var(--ink3)" }}>By Future Banker Hub</p>
+        <p style={{ fontSize: 13, color: "var(--ink3)" }}>By FirstJob Banker</p>
       </div>
 
       {(a.theme || a.tone) && (
