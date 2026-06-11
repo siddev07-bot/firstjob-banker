@@ -401,7 +401,7 @@
   color: var(--ink4); margin-bottom: 18px;
 }
 .fbh-flip-word {
-  font-family: var(--f-display); font-size: 42px; font-weight: 700; color: var(--ink);
+  font-family: var(--f-display); font-size: 32px; font-weight: 700; color: var(--ink);
   letter-spacing: -1px; line-height: 1.15;
 }
 .fbh-flip-pos {
