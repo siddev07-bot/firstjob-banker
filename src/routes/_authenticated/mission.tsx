@@ -387,13 +387,13 @@ function EditorialReader({ mission, onFinish }: { mission: Mission; onFinish: ()
     <div>
       <div className="fbh-glass" style={{ padding: 18, marginBottom: 14 }}>
         <h3 style={{ fontFamily: "var(--f-display)", fontSize: 18, fontWeight: 700, marginBottom: 8 }}>Summary</h3>
-        <p style={{ fontSize: 14, color: "var(--ink3)", lineHeight: 1.6 }}>{mission.summary}</p>
+        <p className="fbh-mission-summary" style={{ color: "var(--ink3)", lineHeight: 1.6 }}>{mission.summary}</p>
       </div>
       {mission.key_points?.length > 0 && (
         <div className="fbh-glass" style={{ padding: 18, marginBottom: 14 }}>
           <h3 style={{ fontFamily: "var(--f-display)", fontSize: 18, fontWeight: 700, marginBottom: 8 }}>5 Key Points</h3>
           <ul style={{ paddingLeft: 20, display: "grid", gap: 6 }}>
-            {mission.key_points.map((p, i) => <li key={i} style={{ fontSize: 14 }}>{p}</li>)}
+            {mission.key_points.map((p, i) => <li key={i} className="fbh-mission-kp">{p}</li>)}
           </ul>
         </div>
       )}

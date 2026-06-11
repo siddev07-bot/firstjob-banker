@@ -516,4 +516,6 @@
 .reading-large .fbh-mission-q-label { font-size: 14px; }
 .reading-large .fbh-mission-question { font-size: 17px; }
 .reading-large .fbh-mission-opt { font-size: 16px; padding: 14px 16px; }
-.reading-large .fbh-mission-explanation { font-size: 15px; }
+.reading-large .fbh-mission-summary { font-size: 16px; }
+.reading-large .fbh-mission-kp { font-size: 16px; }
+
