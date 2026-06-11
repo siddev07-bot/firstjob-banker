@@ -338,18 +338,18 @@
 .fbh-stat-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .6px; color: var(--ink4); margin-top: 6px; }
 
 .fbh-q-opt {
-  display: flex; align-items: flex-start; gap: 12px;
-  padding: 12px 14px; border-radius: var(--r);
+  display: flex; align-items: flex-start; gap: 14px;
+  padding: 16px 18px; border-radius: var(--r);
   border: 1.5px solid var(--border-c); background: var(--paper);
   cursor: pointer; transition: var(--tr); text-align: left; width: 100%;
-  font-family: var(--f-body);
+  font-family: var(--f-body); font-size: 16px; line-height: 1.6;
 }
 .fbh-q-opt:hover:not(:disabled) { border-color: var(--blue2); background: var(--blue-bg); }
 .fbh-q-opt.selected { border-color: var(--blue2); background: var(--blue-bg); }
 .fbh-q-opt.correct { border-color: var(--green); background: var(--green-bg); }
 .fbh-q-opt.wrong { border-color: var(--fbh-accent); background: #fff0ee; }
 .dark .fbh-q-opt.wrong { background: #3a1517; }
-.fbh-q-label { width: 28px; height: 28px; min-width: 28px; border-radius: 7px; background: var(--paper2); border: 1.5px solid var(--border2); display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 800; color: var(--ink3); font-family: var(--f-mono); }
+.fbh-q-label { width: 32px; height: 32px; min-width: 32px; border-radius: 8px; background: var(--paper2); border: 1.5px solid var(--border2); display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 800; color: var(--ink3); font-family: var(--f-mono); }
 .fbh-q-opt.selected .fbh-q-label, .fbh-q-opt.correct .fbh-q-label, .fbh-q-opt.wrong .fbh-q-label { background: currentColor; color: white; }
 
 .fbh-spinner {
