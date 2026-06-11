@@ -77,7 +77,10 @@ function MissionPage() {
             <small style={{ fontSize: 10, fontWeight: 600, color: "var(--ink4)", textTransform: "uppercase", letterSpacing: ".8px" }}>One editorial · Full SBI PO session</small>
           </div>
         </div>
-        <button className="fbh-btn-primary" onClick={() => { setCurrent(null); setView("input"); }}>+ New Mission</button>
+        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+          <ReadingModeToggle />
+          <button className="fbh-btn-primary" onClick={() => { setCurrent(null); setView("input"); }}>+ New Mission</button>
+        </div>
       </header>
 
       <main className="fbh-wrap" style={{ maxWidth: 920 }}>
