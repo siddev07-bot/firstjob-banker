@@ -269,14 +269,14 @@
 }
 .fbh-section-title::after { content:''; flex:1; height:1px; background:var(--border-c); }
 
-.fbh-table-wrap { overflow-x: auto; margin-bottom: 28px; border-radius: var(--r-lg); border: 1px solid var(--border-c); box-shadow: var(--shadow); }
-.fbh-vocab-table { width: 100%; border-collapse: collapse; font-size: 13px; min-width: 560px; }
+.fbh-table-wrap { overflow: auto; max-height: 70vh; margin-bottom: 32px; border-radius: var(--r-lg); border: 1px solid var(--border-c); box-shadow: var(--shadow); }
+.fbh-vocab-table { width: 100%; border-collapse: collapse; font-size: 15px; min-width: 560px; }
 .fbh-vocab-table thead tr { background: var(--ink); color: white; }
-.fbh-vocab-table thead th { padding: 11px 14px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .6px; text-align: left; }
+.fbh-vocab-table thead th { padding: 12px 14px; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: .6px; text-align: left; position: sticky; top: 0; background: var(--ink); z-index: 2; box-shadow: 0 1px 0 var(--border2); }
 .fbh-vocab-table tbody tr { border-bottom: 1px solid var(--border-c); transition: var(--tr); }
 .fbh-vocab-table tbody tr:hover { background: var(--paper2); }
-.fbh-vocab-table tbody td { padding: 11px 14px; vertical-align: top; }
-.fbh-vt-word { font-weight: 700; color: var(--blue2); font-size: 14px; font-family: var(--f-display); }
+.fbh-vocab-table tbody td { padding: 13px 14px; vertical-align: top; }
+.fbh-vt-word { font-weight: 700; color: var(--blue2); font-size: 16px; font-family: var(--f-display); }
 .fbh-vt-pos { display: inline-block; font-size: 10px; font-weight: 700; padding: 1px 7px; border-radius: 10px; text-transform: uppercase; letter-spacing: .4px; background: var(--paper3); color: var(--ink3); }
 
 .fbh-sbi-note {
