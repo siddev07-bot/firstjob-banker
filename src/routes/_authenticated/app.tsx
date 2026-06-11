@@ -129,6 +129,8 @@ function DashboardView({ onOpen, onGenerate }: { onOpen: (a: ArticlePackage) => 
         </div>
       </div>
 
+      <TodayMissionWidget />
+
       <div className="fbh-section-title">📈 Monthly Progress (Last 30 Days)</div>
       <div className="fbh-glass" style={{ padding: 16, marginBottom: 28, height: 240 }}>
         <ResponsiveContainer width="100%" height="100%">
