@@ -397,7 +397,7 @@ function EditorialReader({ mission, onFinish }: { mission: Mission; onFinish: ()
           </ul>
         </div>
       )}
-      <div className="fbh-glass" style={{ padding: 18, marginBottom: 14, whiteSpace: "pre-wrap", fontSize: 14, lineHeight: 1.7 }}>
+      <div className="fbh-glass fbh-mission-editorial" style={{ padding: 18, marginBottom: 14, whiteSpace: "pre-wrap", lineHeight: 1.7 }}>
         {mission.source_text}
       </div>
       <button className="fbh-btn-primary" onClick={onFinish}>✅ Mark editorial as read</button>
@@ -411,7 +411,7 @@ function VocabSection({ mission, onFinish }: { mission: Mission; onFinish: (scor
   const toggle = (i: number) => setKnown((s) => { const n = new Set(s); n.has(i) ? n.delete(i) : n.add(i); return n; });
   return (
     <div>
-      <div style={{ marginBottom: 12, color: "var(--ink3)", fontSize: 13 }}>Tap "I know this" as you study each word. Submit when done.</div>
+      <div style={{ marginBottom: 12, color: "var(--ink3)" }} className="fbh-mission-hint">Tap "I know this" as you study each word. Submit when done.</div>
       <div style={{ display: "grid", gap: 10 }}>
         {mission.vocabulary.map((v, i) => (
           <div key={i} className="fbh-glass" style={{ padding: 14 }}>
@@ -419,11 +419,11 @@ function VocabSection({ mission, onFinish }: { mission: Mission; onFinish: (scor
               <div style={{ fontFamily: "var(--f-display)", fontSize: 18, fontWeight: 700 }}>{v.word}</div>
               <button className={known.has(i) ? "fbh-btn-primary" : "fbh-btn"} onClick={() => toggle(i)}>{known.has(i) ? "✅ Known" : "I know this"}</button>
             </div>
-            <div style={{ fontSize: 13, marginTop: 6 }}><b>Meaning:</b> {v.meaning}</div>
-            {v.hindi && <div style={{ fontSize: 13 }}><b>Hindi:</b> {v.hindi}</div>}
-            {v.synonyms && <div style={{ fontSize: 13 }}><b>Synonyms:</b> {v.synonyms}</div>}
-            {v.antonyms && <div style={{ fontSize: 13 }}><b>Antonyms:</b> {v.antonyms}</div>}
-            {v.example && <div style={{ fontSize: 13, color: "var(--ink3)", marginTop: 4 }}><i>"{v.example}"</i></div>}
+            <div className="fbh-mission-vocab-meaning" style={{ marginTop: 6 }}><b>Meaning:</b> {v.meaning}</div>
+            {v.hindi && <div className="fbh-mission-vocab-meaning"><b>Hindi:</b> {v.hindi}</div>}
+            {v.synonyms && <div className="fbh-mission-vocab-meaning"><b>Synonyms:</b> {v.synonyms}</div>}
+            {v.antonyms && <div className="fbh-mission-vocab-meaning"><b>Antonyms:</b> {v.antonyms}</div>}
+            {v.example && <div className="fbh-mission-vocab-meaning" style={{ color: "var(--ink3)", marginTop: 4 }}><i>"{v.example}"</i></div>}
           </div>
         ))}
       </div>
@@ -452,8 +452,8 @@ function McqSection({ items, onFinish, labelFor }: { items: Mcq[]; onFinish: (sc
       <div style={{ display: "grid", gap: 14 }}>
         {items.map((q, i) => (
           <div key={i} className="fbh-glass" style={{ padding: 14 }}>
-            <div style={{ fontSize: 12, color: "var(--ink4)", marginBottom: 4 }}>Q{i + 1}{labelFor ? ` · ${labelFor(i)}` : ""}</div>
-            <div style={{ fontSize: 14, fontWeight: 600, marginBottom: 10 }}>{q.question}</div>
+            <div className="fbh-mission-q-label" style={{ color: "var(--ink4)", marginBottom: 4 }}>Q{i + 1}{labelFor ? ` · ${labelFor(i)}` : ""}</div>
+            <div className="fbh-mission-question" style={{ fontWeight: 600, marginBottom: 10 }}>{q.question}</div>
             <div style={{ display: "grid", gap: 6 }}>
               {q.options.map((o, oi) => {
                 const picked = answers[i] === oi;
@@ -464,12 +464,13 @@ function McqSection({ items, onFinish, labelFor }: { items: Mcq[]; onFinish: (sc
                     key={oi}
                     disabled={submitted}
                     onClick={() => setAnswers((a) => ({ ...a, [i]: oi }))}
+                    className="fbh-mission-opt"
                     style={{
                       textAlign: "left", padding: "10px 12px", borderRadius: 8,
                       border: `1px solid ${correct ? "#16a34a" : wrong ? "#dc2626" : picked ? "var(--ink)" : "var(--border-c)"}`,
                       background: correct ? "#dcfce7" : wrong ? "#fee2e2" : picked ? "var(--ink)" : "transparent",
                       color: correct ? "#166534" : wrong ? "#991b1b" : picked ? "#fff" : "var(--ink)",
-                      cursor: submitted ? "default" : "pointer", fontSize: 14,
+                      cursor: submitted ? "default" : "pointer",
                     }}
                   >
                     {String.fromCharCode(65 + oi)}. {o}
@@ -478,7 +479,7 @@ function McqSection({ items, onFinish, labelFor }: { items: Mcq[]; onFinish: (sc
               })}
             </div>
             {submitted && q.explanation && (
-              <div style={{ marginTop: 8, fontSize: 13, color: "var(--ink3)" }}><b>Explanation:</b> {q.explanation}</div>
+              <div className="fbh-mission-explanation" style={{ marginTop: 8, color: "var(--ink3)" }}><b>Explanation:</b> {q.explanation}</div>
             )}
           </div>
         ))}
