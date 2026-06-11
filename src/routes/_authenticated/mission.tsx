@@ -3,6 +3,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
+import { useReadingMode } from "@/hooks/use-reading-mode";
 import {
   generateDailyMission,
   saveDailyMission,
@@ -11,6 +12,17 @@ import {
   deleteDailyMission,
   updateSectionProgress,
 } from "@/lib/mission.functions";
+
+function ReadingModeToggle() {
+  const { mode, setMode } = useReadingMode();
+  return (
+    <div className="fbh-read-toolbar" aria-label="Reading mode">
+      <button className={mode === "normal" ? "active" : ""} onClick={() => setMode("normal")} aria-pressed={mode === "normal"}>A</button>
+      <button className={mode === "large" ? "active" : ""} onClick={() => setMode("large")} aria-pressed={mode === "large"} style={{ fontSize: 14 }}>A+</button>
+    </div>
+  );
+}
+
 
 export const Route = createFileRoute("/_authenticated/mission")({
   component: MissionPage,
