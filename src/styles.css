@@ -128,8 +128,8 @@
     font-family: var(--f-body);
     background: var(--paper);
     color: var(--ink);
-    font-size: 15px;
-    line-height: 1.7;
+    font-size: 18px;
+    line-height: 1.75;
     -webkit-font-smoothing: antialiased;
     transition: background .3s, color .3s;
   }
