@@ -365,8 +365,25 @@ function HistoryView({ onOpen }: { onOpen: (a: ArticlePackage) => void }) {
 
 /* ────────── EDITORIAL VIEW ────────── */
 function EditorialView({ a }: { a: ArticlePackage }) {
+  const [progress, setProgress] = useState(0);
+  useEffect(() => {
+    const onScroll = () => {
+      const h = document.documentElement;
+      const max = h.scrollHeight - h.clientHeight;
+      setProgress(max > 0 ? Math.min(100, (h.scrollTop / max) * 100) : 0);
+    };
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, [a.id]);
+
+  const words = (a.full_article || "").trim().split(/\s+/).filter(Boolean).length;
+  const readMin = Math.max(1, Math.round(words / 220));
+
   return (
     <div>
+      <div className="fbh-read-progress"><div className="fbh-read-progress-fill" style={{ width: `${progress}%` }} /></div>
+
       <div className="fbh-meta-row">
         <span className="fbh-meta-badge">Editorial</span>
         <span className="fbh-meta-dot" />
@@ -379,6 +396,13 @@ function EditorialView({ a }: { a: ArticlePackage }) {
         <div className="fbh-article-label">📰 Editorial Vocabulary</div>
         <h1>{a.title}</h1>
         <p style={{ fontSize: 13, color: "var(--ink3)" }}>By FirstJob Banker</p>
+      </div>
+
+      <div className="fbh-read-meta">
+        <span className="pill">⏱ {readMin} min read</span>
+        <span className="pill">📝 {words.toLocaleString()} words</span>
+        <span className="pill">📚 {a.vocabulary?.length ?? 0} vocab words</span>
+        <span style={{ marginLeft: "auto", fontSize: 12, color: "var(--ink4)" }}>Tap highlighted words for meaning</span>
       </div>
 
       {(a.theme || a.tone) && (
@@ -398,7 +422,7 @@ function EditorialView({ a }: { a: ArticlePackage }) {
       {a.takeaways?.length > 0 && (
         <>
           <div className="fbh-section-title">💡 Key Takeaways</div>
-          <ul style={{ listStyle: "none", display: "flex", flexDirection: "column", gap: 8, marginBottom: 22, padding: 0 }}>
+          <ul style={{ listStyle: "none", display: "flex", flexDirection: "column", gap: 8, marginBottom: 28, padding: 0 }}>
             {a.takeaways.map((t, i) => (
               <li key={i} className="fbh-takeaway"><span className="fbh-tk-num">0{i + 1}</span><span>{t}</span></li>
             ))}
@@ -407,9 +431,7 @@ function EditorialView({ a }: { a: ArticlePackage }) {
       )}
 
       <div className="fbh-section-title">📖 Full Editorial</div>
-      <div className="fbh-editorial-body">
-        {a.full_article.split(/\n+/).map((p, i) => <p key={i}>{p}</p>)}
-      </div>
+      <EditorialBody text={a.full_article} vocabulary={a.vocabulary ?? []} />
 
       {a.conclusion && (
         <div className="fbh-conclusion-box">
@@ -425,6 +447,54 @@ function EditorialView({ a }: { a: ArticlePackage }) {
         <button className="fbh-btn" onClick={() => exportNotesPDF(a)}>📓 Notes PDF</button>
         <button className="fbh-btn" onClick={() => printArticle(a)}>🖨 Print</button>
       </div>
+    </div>
+  );
+}
+
+function EditorialBody({ text, vocabulary }: { text: string; vocabulary: ArticlePackage["vocabulary"] }) {
+  const [open, setOpen] = useState<string | null>(null);
+  useEffect(() => {
+    const close = () => setOpen(null);
+    window.addEventListener("click", close);
+    return () => window.removeEventListener("click", close);
+  }, []);
+
+  const vocabMap = useMemo(() => {
+    const m = new Map<string, ArticlePackage["vocabulary"][number]>();
+    (vocabulary ?? []).forEach((v) => { if (v?.word) m.set(v.word.toLowerCase(), v); });
+    return m;
+  }, [vocabulary]);
+
+  const renderParagraph = (para: string, pi: number) => {
+    const parts = para.split(/(\b[\p{L}'-]+\b)/u);
+    return (
+      <p key={pi}>
+        {parts.map((tok, i) => {
+          const v = vocabMap.get(tok.toLowerCase());
+          if (!v) return <span key={i}>{tok}</span>;
+          const id = `${pi}-${i}`;
+          const isOpen = open === id;
+          return (
+            <span key={i} className="fbh-vocab-pop" onClick={(e) => { e.stopPropagation(); setOpen(isOpen ? null : id); }}>
+              {tok}
+              {isOpen && (
+                <span className="fbh-vocab-card" onClick={(e) => e.stopPropagation()}>
+                  <h4>{v.word}</h4>
+                  {v.english && <div className="row"><b>Meaning:</b> {v.english}</div>}
+                  {v.hindi && <div className="row"><b>Hindi:</b> {v.hindi}</div>}
+                  {v.synonyms && <div className="row"><b>Synonyms:</b> <i>{v.synonyms}</i></div>}
+                </span>
+              )}
+            </span>
+          );
+        })}
+      </p>
+    );
+  };
+
+  return (
+    <div className="fbh-editorial-body">
+      {text.split(/\n+/).map((p, i) => renderParagraph(p, i))}
     </div>
   );
 }
