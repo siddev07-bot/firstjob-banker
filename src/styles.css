@@ -511,5 +511,9 @@
 
 /* mission large mode */
 .reading-large .fbh-mission-editorial { font-size: 20px; line-height: 2; }
+.reading-large .fbh-mission-hint { font-size: 15px; }
+.reading-large .fbh-mission-vocab-meaning { font-size: 15px; }
+.reading-large .fbh-mission-q-label { font-size: 14px; }
 .reading-large .fbh-mission-question { font-size: 17px; }
 .reading-large .fbh-mission-opt { font-size: 16px; padding: 14px 16px; }
+.reading-large .fbh-mission-explanation { font-size: 15px; }
