@@ -4,6 +4,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
+import { useReadingMode } from "@/hooks/use-reading-mode";
 import { generateEditorialPackage } from "@/lib/ai.functions";
 import { saveArticle, listArticles, getArticle, deleteArticle, getDashboardStats } from "@/lib/articles.functions";
 import { listDailyMissions } from "@/lib/mission.functions";
@@ -15,6 +16,16 @@ export const Route = createFileRoute("/_authenticated/app")({
 });
 
 type Tab = "dashboard" | "generate" | "history" | "editorial" | "vocab" | "quiz" | "flashcards";
+
+function ReadingModeToggle() {
+  const { mode, setMode } = useReadingMode();
+  return (
+    <div className="fbh-read-toolbar" aria-label="Reading mode">
+      <button className={mode === "normal" ? "active" : ""} onClick={() => setMode("normal")} aria-pressed={mode === "normal"}>A</button>
+      <button className={mode === "large" ? "active" : ""} onClick={() => setMode("large")} aria-pressed={mode === "large"} style={{ fontSize: 14 }}>A+</button>
+    </div>
+  );
+}
 
 function AppPage() {
   const nav = useNavigate();
