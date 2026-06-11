@@ -6,6 +6,7 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { generateEditorialPackage } from "@/lib/ai.functions";
 import { saveArticle, listArticles, getArticle, deleteArticle, getDashboardStats } from "@/lib/articles.functions";
+import { listDailyMissions } from "@/lib/mission.functions";
 import { exportArticlePDF, exportVocabPDF, exportNotesPDF, printArticle, type ArticlePackage } from "@/lib/export";
 import { LineChart, Line, XAxis, YAxis, ResponsiveContainer, Tooltip, CartesianGrid } from "recharts";
 
