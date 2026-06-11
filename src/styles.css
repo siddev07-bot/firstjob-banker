@@ -470,3 +470,46 @@
 
 /* extra section/card breathing room */
 .fbh-glass + .fbh-glass { margin-top: 14px; }
+
+/* ═══ READING MODE ACCESSIBILITY ═══ */
+.reading-large .fbh-editorial-body { font-size: 22px; line-height: 2; max-width: 900px; }
+.reading-large .fbh-editorial-body p { margin-bottom: 1.6em; }
+.reading-large .fbh-read-meta { font-size: 15px; }
+.reading-large .fbh-read-meta .pill { font-size: 14px; padding: 6px 14px; }
+.reading-large .fbh-article-header h1 { font-size: clamp(26px, 4.5vw, 34px); }
+.reading-large .fbh-summary-box p,
+.reading-large .fbh-conclusion-box p { font-size: 19px; line-height: 2; }
+.reading-large .fbh-takeaway { font-size: 16px; padding: 14px 18px; }
+.reading-large .fbh-q-opt { font-size: 18px; padding: 18px 20px; }
+.reading-large .fbh-q-label { width: 36px; height: 36px; min-width: 36px; font-size: 16px; }
+.reading-large .fbh-vocab-table { font-size: 17px; }
+.reading-large .fbh-vocab-table tbody td { padding: 15px 16px; }
+.reading-large .fbh-vt-word { font-size: 18px; }
+.reading-large .fbh-flip-word { font-size: 36px; }
+.reading-large .fbh-flip-hindi { font-size: 32px; }
+.reading-large .fbh-flip-meaning { font-size: 19px; }
+.reading-large .fbh-flip-usage { font-size: 16px; }
+.reading-large .fbh-sbi-note { font-size: 15px; padding: 14px 18px; }
+.reading-large .fbh-sbi-word { font-size: 17px; }
+
+.fbh-read-toolbar {
+  display: inline-flex; align-items: center; gap: 6px;
+  background: var(--paper2); border: 1.5px solid var(--border-c);
+  border-radius: var(--r); padding: 4px 4px;
+  font-size: 12px; font-weight: 700;
+}
+.fbh-read-toolbar button {
+  background: none; border: none; border-radius: 6px;
+  padding: 5px 10px; cursor: pointer; font-weight: 700; font-size: 12px;
+  color: var(--ink4); transition: var(--tr);
+}
+.fbh-read-toolbar button:hover { color: var(--ink); background: var(--paper3); }
+.fbh-read-toolbar button.active { background: var(--fbh-accent); color: white; }
+
+.reading-large .fbh-editorial-body .fbh-vocab-card { font-size: 16px; }
+.reading-large .fbh-editorial-body .fbh-vocab-card h4 { font-size: 20px; }
+
+/* mission large mode */
+.reading-large .fbh-mission-editorial { font-size: 20px; line-height: 2; }
+.reading-large .fbh-mission-question { font-size: 17px; }
+.reading-large .fbh-mission-opt { font-size: 16px; padding: 14px 16px; }
