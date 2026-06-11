@@ -78,7 +78,8 @@ function AppPage() {
           <span className="fbh-tag fbh-tag-ibps">IBPS PO</span>
           <span className="fbh-tag fbh-tag-sbi">SBI PO</span>
           <span className="fbh-tag fbh-tag-eng">English</span>
-          <button onClick={toggleDark} className="fbh-btn" style={{ width: 36, height: 36, padding: 0, justifyContent: "center", borderRadius: "50%" }}>{dark ? "☀️" : "🌙"}</button>
+          <ReadingModeToggle />
+          <button onClick={toggleDark} className="fbh-btn" style={{ width: 36, height: 36, padding: 0, justifyContent: "center", borderRadius: "50%" }} aria-label="Toggle dark mode">{dark ? "☀️" : "🌙"}</button>
           <button onClick={signOut} className="fbh-btn">Sign out</button>
         </div>
       </header>
