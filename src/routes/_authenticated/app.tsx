@@ -165,6 +165,45 @@ function DashboardView({ onOpen, onGenerate }: { onOpen: (a: ArticlePackage) => 
   );
 }
 
+/* ────────── TODAY'S MISSION WIDGET ────────── */
+const MISSION_SECTIONS = ["editorial", "vocabulary", "rc", "error_detection", "cloze", "sentence_improvement"] as const;
+function TodayMissionWidget() {
+  const listFn = useServerFn(listDailyMissions);
+  const q = useQuery({ queryKey: ["missions"], queryFn: () => listFn() });
+  const today = new Date().toISOString().slice(0, 10);
+  const m: any = (q.data ?? []).find((x: any) => x.mission_date === today);
+  const prog = (m?.progress ?? {}) as Record<string, { completed?: boolean; score?: number; total?: number; accuracy?: number }>;
+  const done = MISSION_SECTIONS.filter((k) => prog[k]?.completed).length;
+  const pct = Math.round((done / MISSION_SECTIONS.length) * 100);
+  const totalScore = MISSION_SECTIONS.reduce((s, k) => s + (prog[k]?.score ?? 0), 0);
+  const totalMax = MISSION_SECTIONS.reduce((s, k) => s + (prog[k]?.total ?? 0), 0);
+
+  return (
+    <div className="fbh-glass" style={{ padding: 18, marginBottom: 28, display: "flex", flexWrap: "wrap", gap: 16, alignItems: "center" }}>
+      <div style={{ flex: 1, minWidth: 220 }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 6 }}>
+          <span style={{ fontSize: 22 }}>🎯</span>
+          <div style={{ fontFamily: "var(--f-display)", fontSize: 18, fontWeight: 700 }}>Today's Daily Mission</div>
+        </div>
+        {m ? (
+          <>
+            <div style={{ color: "var(--ink3)", fontSize: 14, marginBottom: 8 }}>{m.title}</div>
+            <div style={{ height: 8, background: "var(--border-c)", borderRadius: 4, overflow: "hidden", marginBottom: 6 }}>
+              <div style={{ width: `${pct}%`, height: "100%", background: "linear-gradient(90deg,var(--accent2),var(--fbh-accent))", transition: "width .3s" }} />
+            </div>
+            <div style={{ fontSize: 12, color: "var(--ink4)" }}>{done}/{MISSION_SECTIONS.length} sections · {pct}% complete · Score {totalScore}/{totalMax || "—"}</div>
+          </>
+        ) : (
+          <div style={{ color: "var(--ink3)", fontSize: 14 }}>No mission for today yet. Paste an editorial to build a full SBI PO session.</div>
+        )}
+      </div>
+      <Link to="/mission" className="fbh-btn-primary" style={{ textDecoration: "none" }}>
+        {m ? (pct === 100 ? "Review" : "Continue") : "Start Mission"} →
+      </Link>
+    </div>
+  );
+}
+
 /* ────────── GENERATOR ────────── */
 function GeneratorView({ onGenerated }: { onGenerated: (a: ArticlePackage) => void }) {
   const [text, setText] = useState("");
