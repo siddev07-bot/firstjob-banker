@@ -424,3 +424,49 @@
   font-size: 14px; color: var(--ink2); line-height: 1.6; max-width: 100%;
 }
 .dark .fbh-flip-usage { background: rgba(0,0,0,.25); border-color: #5a3010; }
+
+/* ═══ READING PROGRESS BAR ═══ */
+.fbh-read-progress {
+  position: sticky; top: 0; z-index: 60;
+  height: 4px; width: 100%;
+  background: transparent;
+}
+.fbh-read-progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--accent2), var(--fbh-accent));
+  transition: width .08s linear;
+}
+.fbh-read-meta {
+  display: flex; gap: 12px; align-items: center; flex-wrap: wrap;
+  font-size: 13px; color: var(--ink3); margin: 0 auto 16px;
+  max-width: 850px;
+}
+.fbh-read-meta .pill {
+  background: var(--paper2); border: 1px solid var(--border-c);
+  padding: 4px 10px; border-radius: 20px; font-weight: 600; font-size: 12px;
+}
+
+/* ═══ VOCAB INLINE POPUP ═══ */
+.fbh-vocab-pop {
+  position: relative; display: inline;
+  color: var(--blue2); font-weight: 600;
+  border-bottom: 2px dotted var(--blue2);
+  cursor: pointer;
+}
+.fbh-vocab-pop:hover { background: rgba(245,158,11,.08); }
+.fbh-vocab-card {
+  position: absolute; z-index: 70;
+  bottom: calc(100% + 8px); left: 0;
+  width: min(320px, 80vw);
+  background: var(--paper); color: var(--ink2);
+  border: 1px solid var(--border-c); border-radius: var(--r);
+  box-shadow: var(--shadow-lg);
+  padding: 12px 14px; font-family: var(--f-body); font-size: 14px;
+  line-height: 1.55;
+}
+.fbh-vocab-card h4 { font-family: var(--f-display); font-size: 18px; margin-bottom: 4px; color: var(--ink); }
+.fbh-vocab-card .row { margin-top: 4px; font-size: 13px; }
+.fbh-vocab-card .row b { color: var(--ink3); }
+
+/* extra section/card breathing room */
+.fbh-glass + .fbh-glass { margin-top: 14px; }
