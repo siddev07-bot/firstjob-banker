@@ -20,9 +20,9 @@ type Tab = "dashboard" | "generate" | "history" | "editorial" | "vocab" | "quiz"
 function ReadingModeToggle() {
   const { mode, setMode } = useReadingMode();
   return (
-    <div className="fbh-read-toolbar" aria-label="Reading mode">
-      <button className={mode === "normal" ? "active" : ""} onClick={() => setMode("normal")} aria-pressed={mode === "normal"}>A</button>
-      <button className={mode === "large" ? "active" : ""} onClick={() => setMode("large")} aria-pressed={mode === "large"} style={{ fontSize: 14 }}>A+</button>
+    <div className="fbh-read-toolbar" role="group" aria-label="Text size">
+      <button className={mode === "normal" ? "active" : ""} onClick={() => setMode("normal")} aria-pressed={mode === "normal"} aria-label="Normal text size">A</button>
+      <button className={mode === "large" ? "active" : ""} onClick={() => setMode("large")} aria-pressed={mode === "large"} aria-label="Large text size" style={{ fontSize: 14 }}>A+</button>
     </div>
   );
 }
@@ -60,7 +60,7 @@ function AppPage() {
   };
 
   return (
-    <div style={{ minHeight: "100vh", background: "var(--paper)" }}>
+    <div style={{ minHeight: "100dvh", background: "var(--paper)" }}>
       <div className="fbh-top-strip">
         <div>📅 {new Date().toLocaleDateString("en-IN", { weekday: "long", day: "numeric", month: "long", year: "numeric" })}</div>
         <div>🎯 SBI PO 2026 Prep</div>
@@ -85,14 +85,14 @@ function AppPage() {
       </header>
 
       <main className="fbh-wrap">
-        <nav className="fbh-tabs">
-          <button className={`fbh-tab text-lg ${tab === "dashboard" ? "active" : ""}`} onClick={() => setTab("dashboard")}>📊 Dashboard</button>
-          <button className={`fbh-tab text-lg ${tab === "generate" ? "active" : ""}`} onClick={() => setTab("generate")}>🤖 AI Generator</button>
-          <button className={`fbh-tab text-lg ${tab === "history" ? "active" : ""}`} onClick={() => setTab("history")}>🗂️ History</button>
-          <button className={`fbh-tab text-lg ${tab === "editorial" ? "active" : ""}`} onClick={() => setTab("editorial")} disabled={!current}>📰 Editorial</button>
-          <button className={`fbh-tab text-lg ${tab === "vocab" ? "active" : ""}`} onClick={() => setTab("vocab")} disabled={!current}>📚 Vocabulary</button>
-          <button className={`fbh-tab text-lg ${tab === "quiz" ? "active" : ""}`} onClick={() => setTab("quiz")} disabled={!current}>📝 Quiz</button>
-          <button className={`fbh-tab text-lg ${tab === "flashcards" ? "active" : ""}`} onClick={() => setTab("flashcards")} disabled={!current}>🎴 Flashcards</button>
+        <nav className="fbh-tabs" role="tablist" aria-label="App sections">
+          <button role="tab" aria-selected={tab === "dashboard"} className={`fbh-tab text-lg ${tab === "dashboard" ? "active" : ""}`} onClick={() => setTab("dashboard")}>📊 Dashboard</button>
+          <button role="tab" aria-selected={tab === "generate"} className={`fbh-tab text-lg ${tab === "generate" ? "active" : ""}`} onClick={() => setTab("generate")}>🤖 AI Generator</button>
+          <button role="tab" aria-selected={tab === "history"} className={`fbh-tab text-lg ${tab === "history" ? "active" : ""}`} onClick={() => setTab("history")}>🗂️ History</button>
+          <button role="tab" aria-selected={tab === "editorial"} className={`fbh-tab text-lg ${tab === "editorial" ? "active" : ""}`} onClick={() => setTab("editorial")} disabled={!current}>📰 Editorial</button>
+          <button role="tab" aria-selected={tab === "vocab"} className={`fbh-tab text-lg ${tab === "vocab" ? "active" : ""}`} onClick={() => setTab("vocab")} disabled={!current}>📚 Vocabulary</button>
+          <button role="tab" aria-selected={tab === "quiz"} className={`fbh-tab text-lg ${tab === "quiz" ? "active" : ""}`} onClick={() => setTab("quiz")} disabled={!current}>📝 Quiz</button>
+          <button role="tab" aria-selected={tab === "flashcards"} className={`fbh-tab text-lg ${tab === "flashcards" ? "active" : ""}`} onClick={() => setTab("flashcards")} disabled={!current}>🎴 Flashcards</button>
         </nav>
 
         {tab === "dashboard" && <DashboardView onOpen={openArticle} onGenerate={() => setTab("generate")} />}
@@ -200,7 +200,7 @@ function TodayMissionWidget() {
         {m ? (
           <>
             <div style={{ color: "var(--ink3)", fontSize: 14, marginBottom: 8 }}>{m.title}</div>
-            <div style={{ height: 8, background: "var(--border-c)", borderRadius: 4, overflow: "hidden", marginBottom: 6 }}>
+            <div role="progressbar" aria-valuenow={pct} aria-valuemin={0} aria-valuemax={100} aria-label="Today's mission progress" style={{ height: 8, background: "var(--border-c)", borderRadius: 4, overflow: "hidden", marginBottom: 6 }}>
               <div style={{ width: `${pct}%`, height: "100%", background: "linear-gradient(90deg,var(--accent2),var(--fbh-accent))", transition: "width .3s" }} />
             </div>
             <div style={{ fontSize: 12, color: "var(--ink4)" }}>{done}/{MISSION_SECTIONS.length} sections · {pct}% complete · Score {totalScore}/{totalMax || "—"}</div>
@@ -269,7 +269,7 @@ function GeneratorView({ onGenerated }: { onGenerated: (a: ArticlePackage) => vo
         <h2 style={{ fontFamily: "var(--f-display)", fontSize: 22, fontWeight: 700, marginBottom: 6 }}>🤖 AI Editorial Package Generator</h2>
         <p style={{ color: "var(--ink3)", fontSize: 14, marginBottom: 16 }}>Paste any newspaper editorial (The Hindu, Indian Express, ET, etc.) and get a complete SBI PO study package in ~30 seconds.</p>
 
-        <textarea className="fbh-textarea" placeholder="Paste your editorial here… (minimum 100 words recommended)" value={text} onChange={(e) => setText(e.target.value)} />
+        <textarea className="fbh-textarea" aria-label="Editorial text to analyze" placeholder="Paste your editorial here… (minimum 100 words recommended)" value={text} onChange={(e) => setText(e.target.value)} />
 
         <div style={{ display: "flex", alignItems: "center", gap: 12, marginTop: 14, flexWrap: "wrap" }}>
           <button className="fbh-btn-primary" disabled={gen.isPending || text.trim().length < 50} onClick={() => gen.mutate()}>
@@ -390,9 +390,9 @@ function HistoryView({ onOpen }: { onOpen: (a: ArticlePackage) => void }) {
       </div>
 
       <div style={{ display: "flex", gap: 10, marginBottom: 18, flexWrap: "wrap" }}>
-        <input className="fbh-input" placeholder="🔍 Search by title…" value={q} onChange={(e) => setQ(e.target.value)} style={{ flex: 1, minWidth: 200 }} />
-        <input type="date" className="fbh-input" value={date} onChange={(e) => setDate(e.target.value)} style={{ maxWidth: 200 }} />
-        {(q || date) && <button className="fbh-btn" onClick={() => { setQ(""); setDate(""); }}>Clear</button>}
+        <input className="fbh-input" aria-label="Search articles by title" placeholder="🔍 Search by title…" value={q} onChange={(e) => setQ(e.target.value)} style={{ flex: 1, minWidth: 200 }} />
+        <input type="date" className="fbh-input" aria-label="Filter articles by date" value={date} onChange={(e) => setDate(e.target.value)} style={{ maxWidth: 200 }} />
+        {(q || date) && <button className="fbh-btn" onClick={() => { setQ(""); setDate(""); }}>Clear filters</button>}
       </div>
 
       {list.isLoading && <p>Loading…</p>}
@@ -402,14 +402,21 @@ function HistoryView({ onOpen }: { onOpen: (a: ArticlePackage) => void }) {
       <div style={{ display: "grid", gap: 10 }}>
         {filtered.map((a: any) => (
           <div key={a.id} className="fbh-glass" style={{ padding: 14, display: "flex", gap: 12, alignItems: "center" }}>
-            <div style={{ flex: 1, cursor: "pointer" }} onClick={async () => onOpen((await getFn({ data: { id: a.id } })) as any)}>
+            <div
+              style={{ flex: 1, cursor: "pointer" }}
+              role="button"
+              tabIndex={0}
+              aria-label={`Open article: ${a.title}`}
+              onClick={async () => onOpen((await getFn({ data: { id: a.id } })) as any)}
+              onKeyDown={async (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); onOpen((await getFn({ data: { id: a.id } })) as any); } }}
+            >
               <div style={{ fontFamily: "var(--f-display)", fontSize: 16, fontWeight: 700, color: "var(--ink)" }}>{a.title}</div>
               <div style={{ fontSize: 12, color: "var(--ink4)", marginTop: 2 }}>
                 {new Date(a.created_at).toLocaleString()} · {(a.vocabulary as any[])?.length ?? 0} words · {(a.quiz as any[])?.length ?? 0} questions
               </div>
             </div>
-            <button className="fbh-btn" onClick={async () => onOpen((await getFn({ data: { id: a.id } })) as any)}>Open</button>
-            <button className="fbh-btn" onClick={() => remove(a.id)} style={{ color: "var(--fbh-accent)" }}>🗑</button>
+            <button className="fbh-btn" aria-label={`Open article: ${a.title}`} onClick={async () => onOpen((await getFn({ data: { id: a.id } })) as any)}>Open</button>
+            <button className="fbh-btn" aria-label={`Delete article: ${a.title}`} onClick={() => remove(a.id)} style={{ color: "var(--fbh-accent)" }}>🗑</button>
           </div>
         ))}
       </div>
@@ -436,7 +443,7 @@ function EditorialView({ a }: { a: ArticlePackage }) {
 
   return (
     <div>
-      <div className="fbh-read-progress"><div className="fbh-read-progress-fill" style={{ width: `${progress}%` }} /></div>
+      <div className="fbh-read-progress" role="progressbar" aria-valuenow={Math.round(progress)} aria-valuemin={0} aria-valuemax={100} aria-label="Reading progress"><div className="fbh-read-progress-fill" style={{ width: `${progress}%` }} /></div>
 
       <div className="fbh-meta-row">
         <span className="fbh-meta-badge">Editorial</span>
@@ -529,7 +536,16 @@ function EditorialBody({ text, vocabulary }: { text: string; vocabulary: Article
           const id = `${pi}-${i}`;
           const isOpen = open === id;
           return (
-            <span key={i} className="fbh-vocab-pop" onClick={(e) => { e.stopPropagation(); setOpen(isOpen ? null : id); }}>
+            <span
+              key={i}
+              className="fbh-vocab-pop"
+              role="button"
+              tabIndex={0}
+              aria-expanded={isOpen}
+              aria-label={`Show meaning of ${v.word}`}
+              onClick={(e) => { e.stopPropagation(); setOpen(isOpen ? null : id); }}
+              onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); e.stopPropagation(); setOpen(isOpen ? null : id); } }}
+            >
               {tok}
               {isOpen && (
                 <span className="fbh-vocab-card" onClick={(e) => e.stopPropagation()}>
@@ -649,7 +665,7 @@ function QuizView({ a }: { a: ArticlePackage }) {
           })}
         </div>
         {picked != null && q!.explanation && (
-          <div style={{ marginTop: 14, padding: "14px 16px", background: "var(--blue-bg)", border: "1px solid #bfdbfe", borderRadius: 10, fontSize: 13, color: "var(--ink2)" }}>
+          <div role="status" style={{ marginTop: 14, padding: "14px 16px", background: "var(--blue-bg)", border: "1px solid #bfdbfe", borderRadius: 10, fontSize: 13, color: "var(--ink2)" }}>
             <div style={{ fontSize: 11, fontWeight: 800, textTransform: "uppercase", letterSpacing: ".6px", color: "var(--blue2)", marginBottom: 4 }}>💡 Explanation</div>
             {q!.explanation}
           </div>
@@ -731,6 +747,7 @@ function FlashcardView({ a }: { a: ArticlePackage }) {
       <div style={{ display: "flex", gap: 10, marginBottom: 14, flexWrap: "wrap" }}>
         <input
           className="fbh-input"
+          aria-label="Search flashcards by word, meaning, or synonym"
           placeholder="🔍 Search word, meaning, synonym…"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
@@ -738,6 +755,7 @@ function FlashcardView({ a }: { a: ArticlePackage }) {
         />
         <select
           className="fbh-input"
+          aria-label="Filter by part of speech"
           value={posFilter}
           onChange={(e) => setPosFilter(e.target.value)}
           style={{ maxWidth: 180 }}
@@ -758,9 +776,16 @@ function FlashcardView({ a }: { a: ArticlePackage }) {
         </div>
       ) : (
         <>
-          <div className="fbh-progress-bar"><div className="fbh-progress-fill" style={{ width: `${((idx + 1) / filteredWords.length) * 100}%` }} /></div>
+          <div className="fbh-progress-bar" role="progressbar" aria-valuenow={idx + 1} aria-valuemin={1} aria-valuemax={filteredWords.length} aria-label={`Card ${idx + 1} of ${filteredWords.length}`}><div className="fbh-progress-fill" style={{ width: `${((idx + 1) / filteredWords.length) * 100}%` }} /></div>
 
-          <div className="fbh-flip-wrap" onClick={() => setFlipped(!flipped)} role="button" tabIndex={0}>
+          <div
+            className="fbh-flip-wrap"
+            onClick={() => setFlipped(!flipped)}
+            onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); setFlipped(!flipped); } }}
+            role="button"
+            tabIndex={0}
+            aria-label={flipped ? `Meaning shown for ${v.word}. Press Enter to flip back` : `Flashcard: ${v.word}. Press Enter to reveal meaning`}
+          >
             <div className={`fbh-flip-card ${flipped ? "flipped" : ""}`}>
               <div className="fbh-flip-front">
                 <div className="fbh-flip-badge">WORD</div>

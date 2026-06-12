@@ -16,9 +16,9 @@ import {
 function ReadingModeToggle() {
   const { mode, setMode } = useReadingMode();
   return (
-    <div className="fbh-read-toolbar" aria-label="Reading mode">
-      <button className={mode === "normal" ? "active" : ""} onClick={() => setMode("normal")} aria-pressed={mode === "normal"}>A</button>
-      <button className={mode === "large" ? "active" : ""} onClick={() => setMode("large")} aria-pressed={mode === "large"} style={{ fontSize: 14 }}>A+</button>
+    <div className="fbh-read-toolbar" role="group" aria-label="Text size">
+      <button className={mode === "normal" ? "active" : ""} onClick={() => setMode("normal")} aria-pressed={mode === "normal"} aria-label="Normal text size">A</button>
+      <button className={mode === "large" ? "active" : ""} onClick={() => setMode("large")} aria-pressed={mode === "large"} aria-label="Large text size" style={{ fontSize: 14 }}>A+</button>
     </div>
   );
 }
@@ -67,7 +67,7 @@ function MissionPage() {
   const [view, setView] = useState<"home" | "input" | "play">("home");
 
   return (
-    <div style={{ minHeight: "100vh", background: "var(--paper)" }}>
+    <div style={{ minHeight: "100dvh", background: "var(--paper)" }}>
       <header className="fbh-header">
         <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
           <Link to="/app" className="fbh-btn" style={{ padding: "6px 10px" }}>← Back</Link>
@@ -144,8 +144,8 @@ function HomeView({ onOpen, onNew }: { onOpen: (m: Mission) => void; onNew: () =
                   {m.mission_date} · {m.topic || "—"} · {m.difficulty || "—"} · {done}/{SECTIONS.length} done
                 </div>
               </div>
-              <button className="fbh-btn-primary" onClick={async () => onOpen((await getFn({ data: { id: m.id } })) as unknown as Mission)}>Open</button>
-              <button className="fbh-btn" onClick={() => remove(m.id)}>Delete</button>
+              <button className="fbh-btn-primary" aria-label={`Open mission: ${m.title}`} onClick={async () => onOpen((await getFn({ data: { id: m.id } })) as unknown as Mission)}>Open</button>
+              <button className="fbh-btn" aria-label={`Delete mission: ${m.title}`} onClick={() => remove(m.id)}>Delete</button>
             </div>
           );
         })}
@@ -201,6 +201,7 @@ function InputView({ onCreated, onCancel }: { onCreated: (m: Mission) => void; o
       <p style={{ color: "var(--ink3)", fontSize: 14, marginBottom: 14 }}>Paste the full editorial text below. Minimum ~150 words recommended.</p>
       <textarea
         className="fbh-textarea"
+        aria-label="Editorial text for daily mission"
         placeholder="Paste editorial text here…"
         value={text}
         onChange={(e) => setText(e.target.value)}
@@ -367,8 +368,8 @@ function SectionRunner({ mission, section, onDone, onBack }: { mission: Mission;
       <div style={{ position: "sticky", top: 0, zIndex: 10, background: "var(--paper)", padding: "10px 0", borderBottom: "1px solid var(--border-c)", marginBottom: 16, display: "flex", gap: 10, alignItems: "center", flexWrap: "wrap" }}>
         <button className="fbh-btn" onClick={onBack}>← Back</button>
         <div style={{ fontFamily: "var(--f-display)", fontSize: 18, fontWeight: 700 }}>{meta.emoji} {meta.label}</div>
-        <div style={{ marginLeft: "auto", fontFamily: "var(--f-display)", fontWeight: 800, fontSize: 22, color: remaining < 60 ? "#dc2626" : "var(--ink)" }}>⏱ {mm}:{ss}</div>
-        <button className="fbh-btn" onClick={() => setRunning((r) => !r)}>{running ? "Pause" : "Resume"}</button>
+        <div role="timer" aria-label={`Time remaining: ${mm} minutes ${ss} seconds`} style={{ marginLeft: "auto", fontFamily: "var(--f-display)", fontWeight: 800, fontSize: 22, color: remaining < 60 ? "#dc2626" : "var(--ink)" }}>⏱ {mm}:{ss}</div>
+        <button className="fbh-btn" aria-label={running ? "Pause timer" : "Resume timer"} onClick={() => setRunning((r) => !r)}>{running ? "Pause" : "Resume"}</button>
       </div>
 
       {section === "editorial" && <EditorialReader mission={mission} onFinish={() => finish(1, 1)} />}
