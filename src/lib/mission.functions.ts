@@ -24,6 +24,16 @@ const GrammarNote = z.object({
   common_error: z.string().optional().default(""),
 });
 
+const Analysis = z.object({
+  issue: z.string().default(""),
+  causes: z.array(z.string()).default([]),
+  effects: z.array(z.string()).default([]),
+  solutions: z.array(z.string()).default([]),
+  author_tone: z.string().default(""),
+  main_idea: z.string().default(""),
+  one_line_summary: z.string().default(""),
+});
+
 const MissionPayload = z.object({
   title: z.string().min(1).max(500),
   source_text: z.string().min(1),
@@ -31,6 +41,10 @@ const MissionPayload = z.object({
   key_points: z.array(z.string()).default([]),
   difficulty: z.string().default(""),
   topic: z.string().default(""),
+  analysis: Analysis.default({
+    issue: "", causes: [], effects: [], solutions: [],
+    author_tone: "", main_idea: "", one_line_summary: "",
+  }),
   vocabulary: z.array(VocabEntry).default([]),
   rc_prelims: z.array(Mcq).default([]),
   rc_mains: z.array(Mcq).default([]),
@@ -39,6 +53,7 @@ const MissionPayload = z.object({
   sentence_improvement: z.array(Mcq).default([]),
   grammar_notes: z.array(GrammarNote).default([]),
 });
+
 
 const SYSTEM_PROMPT = `You are an expert SBI PO English coach. From a newspaper editorial, produce a complete daily practice mission.
 
