@@ -386,6 +386,7 @@ function SectionRunner({ mission, section, onDone, onBack }: { mission: Mission;
       </div>
 
       {section === "editorial" && <EditorialReader mission={mission} onFinish={() => finish(1, 1)} />}
+      {section === "analysis" && <AnalysisSection mission={mission} onFinish={() => finish(1, 1)} />}
       {section === "vocabulary" && <VocabSection mission={mission} onFinish={finish} />}
       {section === "rc" && <McqSection items={[...mission.rc_prelims, ...mission.rc_mains]} onFinish={finish} labelFor={(i) => (i < mission.rc_prelims.length ? "Prelims" : "Mains")} />}
       {section === "error_detection" && <McqSection items={mission.error_detection} onFinish={finish} />}
