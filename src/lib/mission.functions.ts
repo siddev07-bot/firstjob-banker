@@ -65,6 +65,15 @@ Return ONLY valid JSON in this exact shape (no markdown):
   "key_points": ["5 bullet points covering the editorial"],
   "difficulty": "Easy | Moderate | Hard",
   "topic": "one-line topic category (e.g., Economy, Banking, Geopolitics)",
+  "analysis": {
+    "issue": "1-2 sentence statement of the core problem the editorial addresses",
+    "causes": ["exactly 3 root causes drawn from the editorial"],
+    "effects": ["exactly 3 consequences/impacts discussed"],
+    "solutions": ["exactly 3 solutions, reforms, or recommendations"],
+    "author_tone": "single line (e.g., Analytical, Critical, Cautionary, Optimistic)",
+    "main_idea": "1-2 sentence main idea of the editorial",
+    "one_line_summary": "single sentence summarising the entire editorial"
+  },
   "vocabulary": [
     { "word": "...", "meaning": "english meaning", "hindi": "hindi meaning", "synonyms": "comma list", "antonyms": "comma list", "example": "sentence from or based on editorial" }
   ], // EXACTLY 15 high-value words from the editorial
