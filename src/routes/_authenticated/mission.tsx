@@ -420,6 +420,50 @@ function EditorialReader({ mission, onFinish }: { mission: Mission; onFinish: ()
   );
 }
 
+/* Editorial Analysis: structured breakdown (Issue / Causes / Effects / Solutions / Tone / Main Idea) */
+function AnalysisSection({ mission, onFinish }: { mission: Mission; onFinish: () => void }) {
+  const a = mission.analysis ?? { issue: "", causes: [], effects: [], solutions: [], author_tone: "", main_idea: "", one_line_summary: "" };
+  const hasAny = a.issue || a.causes?.length || a.effects?.length || a.solutions?.length || a.author_tone || a.main_idea || a.one_line_summary;
+
+  const Block = ({ title, emoji, children }: { title: string; emoji: string; children: React.ReactNode }) => (
+    <div className="fbh-glass" style={{ padding: 18, marginBottom: 14 }}>
+      <h3 style={{ fontFamily: "var(--f-display)", fontSize: 18, fontWeight: 700, marginBottom: 10 }}>{emoji} {title}</h3>
+      {children}
+    </div>
+  );
+
+  const List = ({ items }: { items: string[] }) => (
+    <ol style={{ paddingLeft: 22, display: "grid", gap: 8 }}>
+      {items.map((s, i) => <li key={i} className="fbh-mission-kp">{s}</li>)}
+    </ol>
+  );
+
+  return (
+    <div>
+      {!hasAny && (
+        <div className="fbh-glass" style={{ padding: 18, marginBottom: 14, color: "var(--ink4)" }}>
+          This mission was created before the Editorial Analysis feature. Generate a new mission to see the full breakdown.
+        </div>
+      )}
+
+      {a.issue && <Block title="Issue" emoji="⚠️"><p style={{ lineHeight: 1.7 }}>{a.issue}</p></Block>}
+      {a.causes?.length > 0 && <Block title="Causes" emoji="🔎"><List items={a.causes} /></Block>}
+      {a.effects?.length > 0 && <Block title="Effects" emoji="📈"><List items={a.effects} /></Block>}
+      {a.solutions?.length > 0 && <Block title="Solutions" emoji="🛠"><List items={a.solutions} /></Block>}
+      {a.author_tone && <Block title="Author's Tone" emoji="🎙"><p style={{ lineHeight: 1.7 }}>{a.author_tone}</p></Block>}
+      {a.main_idea && <Block title="Main Idea" emoji="💡"><p style={{ lineHeight: 1.7 }}>{a.main_idea}</p></Block>}
+      {a.one_line_summary && (
+        <Block title="One-Sentence Summary" emoji="📝">
+          <p style={{ lineHeight: 1.7, fontStyle: "italic", color: "var(--ink2)" }}>"{a.one_line_summary}"</p>
+        </Block>
+      )}
+
+      <button className="fbh-btn-primary" onClick={onFinish}>✅ Mark analysis as studied</button>
+    </div>
+  );
+}
+
+
 function VocabSection({ mission, onFinish }: { mission: Mission; onFinish: (score: number, total: number) => void }) {
   const total = mission.vocabulary.length;
   const [known, setKnown] = useState<Set<number>>(new Set());
