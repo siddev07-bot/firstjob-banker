@@ -31,6 +31,15 @@ export const Route = createFileRoute("/_authenticated/mission")({
 type Mcq = { question: string; options: string[]; answer: number; explanation?: string };
 type Vocab = { word: string; meaning: string; hindi: string; synonyms: string; antonyms: string; example: string };
 type GrammarNote = { rule: string; example: string; common_error: string };
+type Analysis = {
+  issue: string;
+  causes: string[];
+  effects: string[];
+  solutions: string[];
+  author_tone: string;
+  main_idea: string;
+  one_line_summary: string;
+};
 type Mission = {
   id: string;
   title: string;
@@ -39,6 +48,7 @@ type Mission = {
   key_points: string[];
   difficulty: string;
   topic: string;
+  analysis?: Analysis;
   vocabulary: Vocab[];
   rc_prelims: Mcq[];
   rc_mains: Mcq[];
@@ -51,16 +61,18 @@ type Mission = {
   mission_date: string;
 };
 type SectionProgress = { completed: boolean; score: number; total: number; accuracy: number; time_taken_sec: number };
-type SectionKey = "editorial" | "vocabulary" | "rc" | "error_detection" | "cloze" | "sentence_improvement";
+type SectionKey = "editorial" | "analysis" | "vocabulary" | "rc" | "error_detection" | "cloze" | "sentence_improvement";
 
 const SECTIONS: { key: SectionKey; label: string; minutes: number; emoji: string }[] = [
   { key: "editorial", label: "Editorial Reading", minutes: 20, emoji: "📰" },
+  { key: "analysis", label: "Editorial Analysis", minutes: 10, emoji: "🧠" },
   { key: "vocabulary", label: "Vocabulary", minutes: 8, emoji: "📚" },
   { key: "rc", label: "Reading Comprehension", minutes: 12, emoji: "🔍" },
   { key: "error_detection", label: "Error Detection", minutes: 8, emoji: "✂️" },
   { key: "cloze", label: "Cloze Test", minutes: 8, emoji: "🧩" },
   { key: "sentence_improvement", label: "Sentence Improvement", minutes: 8, emoji: "✏️" },
 ];
+
 
 function MissionPage() {
   const [current, setCurrent] = useState<Mission | null>(null);
