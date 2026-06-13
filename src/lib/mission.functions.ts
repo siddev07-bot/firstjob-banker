@@ -89,6 +89,7 @@ All questions must be at SBI PO level. Keep options crisp and unambiguous.`;
 
 const SECTION_KEYS = [
   "editorial",
+  "analysis",
   "vocabulary",
   "rc",
   "error_detection",
@@ -96,6 +97,7 @@ const SECTION_KEYS = [
   "sentence_improvement",
 ] as const;
 type SectionKey = (typeof SECTION_KEYS)[number];
+
 
 function logAndThrow(op: string, error: unknown): never {
   console.error(`[mission.${op}]`, error);
