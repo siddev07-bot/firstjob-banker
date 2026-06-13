@@ -187,6 +187,7 @@ function InputView({ onCreated, onCancel }: { onCreated: (m: Mission) => void; o
           key_points: pkg.key_points ?? [],
           difficulty: pkg.difficulty ?? "",
           topic: pkg.topic ?? "",
+          analysis: pkg.analysis ?? { issue: "", causes: [], effects: [], solutions: [], author_tone: "", main_idea: "", one_line_summary: "" },
           vocabulary: pkg.vocabulary ?? [],
           rc_prelims: pkg.rc_prelims ?? [],
           rc_mains: pkg.rc_mains ?? [],
