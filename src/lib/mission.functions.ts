@@ -24,6 +24,16 @@ const GrammarNote = z.object({
   common_error: z.string().optional().default(""),
 });
 
+const Analysis = z.object({
+  issue: z.string().default(""),
+  causes: z.array(z.string()).default([]),
+  effects: z.array(z.string()).default([]),
+  solutions: z.array(z.string()).default([]),
+  author_tone: z.string().default(""),
+  main_idea: z.string().default(""),
+  one_line_summary: z.string().default(""),
+});
+
 const MissionPayload = z.object({
   title: z.string().min(1).max(500),
   source_text: z.string().min(1),
@@ -31,6 +41,10 @@ const MissionPayload = z.object({
   key_points: z.array(z.string()).default([]),
   difficulty: z.string().default(""),
   topic: z.string().default(""),
+  analysis: Analysis.default({
+    issue: "", causes: [], effects: [], solutions: [],
+    author_tone: "", main_idea: "", one_line_summary: "",
+  }),
   vocabulary: z.array(VocabEntry).default([]),
   rc_prelims: z.array(Mcq).default([]),
   rc_mains: z.array(Mcq).default([]),
@@ -39,6 +53,7 @@ const MissionPayload = z.object({
   sentence_improvement: z.array(Mcq).default([]),
   grammar_notes: z.array(GrammarNote).default([]),
 });
+
 
 const SYSTEM_PROMPT = `You are an expert SBI PO English coach. From a newspaper editorial, produce a complete daily practice mission.
 
@@ -50,6 +65,15 @@ Return ONLY valid JSON in this exact shape (no markdown):
   "key_points": ["5 bullet points covering the editorial"],
   "difficulty": "Easy | Moderate | Hard",
   "topic": "one-line topic category (e.g., Economy, Banking, Geopolitics)",
+  "analysis": {
+    "issue": "1-2 sentence statement of the core problem the editorial addresses",
+    "causes": ["exactly 3 root causes drawn from the editorial"],
+    "effects": ["exactly 3 consequences/impacts discussed"],
+    "solutions": ["exactly 3 solutions, reforms, or recommendations"],
+    "author_tone": "single line (e.g., Analytical, Critical, Cautionary, Optimistic)",
+    "main_idea": "1-2 sentence main idea of the editorial",
+    "one_line_summary": "single sentence summarising the entire editorial"
+  },
   "vocabulary": [
     { "word": "...", "meaning": "english meaning", "hindi": "hindi meaning", "synonyms": "comma list", "antonyms": "comma list", "example": "sentence from or based on editorial" }
   ], // EXACTLY 15 high-value words from the editorial
@@ -65,6 +89,7 @@ All questions must be at SBI PO level. Keep options crisp and unambiguous.`;
 
 const SECTION_KEYS = [
   "editorial",
+  "analysis",
   "vocabulary",
   "rc",
   "error_detection",
@@ -72,6 +97,7 @@ const SECTION_KEYS = [
   "sentence_improvement",
 ] as const;
 type SectionKey = (typeof SECTION_KEYS)[number];
+
 
 function logAndThrow(op: string, error: unknown): never {
   console.error(`[mission.${op}]`, error);

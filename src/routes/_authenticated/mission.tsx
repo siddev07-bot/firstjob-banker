@@ -31,6 +31,15 @@ export const Route = createFileRoute("/_authenticated/mission")({
 type Mcq = { question: string; options: string[]; answer: number; explanation?: string };
 type Vocab = { word: string; meaning: string; hindi: string; synonyms: string; antonyms: string; example: string };
 type GrammarNote = { rule: string; example: string; common_error: string };
+type Analysis = {
+  issue: string;
+  causes: string[];
+  effects: string[];
+  solutions: string[];
+  author_tone: string;
+  main_idea: string;
+  one_line_summary: string;
+};
 type Mission = {
   id: string;
   title: string;
@@ -39,6 +48,7 @@ type Mission = {
   key_points: string[];
   difficulty: string;
   topic: string;
+  analysis?: Analysis;
   vocabulary: Vocab[];
   rc_prelims: Mcq[];
   rc_mains: Mcq[];
@@ -51,16 +61,18 @@ type Mission = {
   mission_date: string;
 };
 type SectionProgress = { completed: boolean; score: number; total: number; accuracy: number; time_taken_sec: number };
-type SectionKey = "editorial" | "vocabulary" | "rc" | "error_detection" | "cloze" | "sentence_improvement";
+type SectionKey = "editorial" | "analysis" | "vocabulary" | "rc" | "error_detection" | "cloze" | "sentence_improvement";
 
 const SECTIONS: { key: SectionKey; label: string; minutes: number; emoji: string }[] = [
   { key: "editorial", label: "Editorial Reading", minutes: 20, emoji: "📰" },
+  { key: "analysis", label: "Editorial Analysis", minutes: 10, emoji: "🧠" },
   { key: "vocabulary", label: "Vocabulary", minutes: 8, emoji: "📚" },
   { key: "rc", label: "Reading Comprehension", minutes: 12, emoji: "🔍" },
   { key: "error_detection", label: "Error Detection", minutes: 8, emoji: "✂️" },
   { key: "cloze", label: "Cloze Test", minutes: 8, emoji: "🧩" },
   { key: "sentence_improvement", label: "Sentence Improvement", minutes: 8, emoji: "✏️" },
 ];
+
 
 function MissionPage() {
   const [current, setCurrent] = useState<Mission | null>(null);
@@ -175,6 +187,7 @@ function InputView({ onCreated, onCancel }: { onCreated: (m: Mission) => void; o
           key_points: pkg.key_points ?? [],
           difficulty: pkg.difficulty ?? "",
           topic: pkg.topic ?? "",
+          analysis: pkg.analysis ?? { issue: "", causes: [], effects: [], solutions: [], author_tone: "", main_idea: "", one_line_summary: "" },
           vocabulary: pkg.vocabulary ?? [],
           rc_prelims: pkg.rc_prelims ?? [],
           rc_mains: pkg.rc_mains ?? [],
@@ -373,6 +386,7 @@ function SectionRunner({ mission, section, onDone, onBack }: { mission: Mission;
       </div>
 
       {section === "editorial" && <EditorialReader mission={mission} onFinish={() => finish(1, 1)} />}
+      {section === "analysis" && <AnalysisSection mission={mission} onFinish={() => finish(1, 1)} />}
       {section === "vocabulary" && <VocabSection mission={mission} onFinish={finish} />}
       {section === "rc" && <McqSection items={[...mission.rc_prelims, ...mission.rc_mains]} onFinish={finish} labelFor={(i) => (i < mission.rc_prelims.length ? "Prelims" : "Mains")} />}
       {section === "error_detection" && <McqSection items={mission.error_detection} onFinish={finish} />}
@@ -405,6 +419,50 @@ function EditorialReader({ mission, onFinish }: { mission: Mission; onFinish: ()
     </div>
   );
 }
+
+/* Editorial Analysis: structured breakdown (Issue / Causes / Effects / Solutions / Tone / Main Idea) */
+function AnalysisSection({ mission, onFinish }: { mission: Mission; onFinish: () => void }) {
+  const a = mission.analysis ?? { issue: "", causes: [], effects: [], solutions: [], author_tone: "", main_idea: "", one_line_summary: "" };
+  const hasAny = a.issue || a.causes?.length || a.effects?.length || a.solutions?.length || a.author_tone || a.main_idea || a.one_line_summary;
+
+  const Block = ({ title, emoji, children }: { title: string; emoji: string; children: React.ReactNode }) => (
+    <div className="fbh-glass" style={{ padding: 18, marginBottom: 14 }}>
+      <h3 style={{ fontFamily: "var(--f-display)", fontSize: 18, fontWeight: 700, marginBottom: 10 }}>{emoji} {title}</h3>
+      {children}
+    </div>
+  );
+
+  const List = ({ items }: { items: string[] }) => (
+    <ol style={{ paddingLeft: 22, display: "grid", gap: 8 }}>
+      {items.map((s, i) => <li key={i} className="fbh-mission-kp">{s}</li>)}
+    </ol>
+  );
+
+  return (
+    <div>
+      {!hasAny && (
+        <div className="fbh-glass" style={{ padding: 18, marginBottom: 14, color: "var(--ink4)" }}>
+          This mission was created before the Editorial Analysis feature. Generate a new mission to see the full breakdown.
+        </div>
+      )}
+
+      {a.issue && <Block title="Issue" emoji="⚠️"><p style={{ lineHeight: 1.7 }}>{a.issue}</p></Block>}
+      {a.causes?.length > 0 && <Block title="Causes" emoji="🔎"><List items={a.causes} /></Block>}
+      {a.effects?.length > 0 && <Block title="Effects" emoji="📈"><List items={a.effects} /></Block>}
+      {a.solutions?.length > 0 && <Block title="Solutions" emoji="🛠"><List items={a.solutions} /></Block>}
+      {a.author_tone && <Block title="Author's Tone" emoji="🎙"><p style={{ lineHeight: 1.7 }}>{a.author_tone}</p></Block>}
+      {a.main_idea && <Block title="Main Idea" emoji="💡"><p style={{ lineHeight: 1.7 }}>{a.main_idea}</p></Block>}
+      {a.one_line_summary && (
+        <Block title="One-Sentence Summary" emoji="📝">
+          <p style={{ lineHeight: 1.7, fontStyle: "italic", color: "var(--ink2)" }}>"{a.one_line_summary}"</p>
+        </Block>
+      )}
+
+      <button className="fbh-btn-primary" onClick={onFinish}>✅ Mark analysis as studied</button>
+    </div>
+  );
+}
+
 
 function VocabSection({ mission, onFinish }: { mission: Mission; onFinish: (score: number, total: number) => void }) {
   const total = mission.vocabulary.length;

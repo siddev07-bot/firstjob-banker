@@ -67,6 +67,7 @@ export type Database = {
       }
       daily_missions: {
         Row: {
+          analysis: Json
           cloze: Json
           created_at: string
           difficulty: string | null
@@ -88,6 +89,7 @@ export type Database = {
           vocabulary: Json
         }
         Insert: {
+          analysis?: Json
           cloze?: Json
           created_at?: string
           difficulty?: string | null
@@ -109,6 +111,7 @@ export type Database = {
           vocabulary?: Json
         }
         Update: {
+          analysis?: Json
           cloze?: Json
           created_at?: string
           difficulty?: string | null
