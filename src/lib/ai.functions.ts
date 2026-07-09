@@ -15,6 +15,15 @@ Return ONLY valid JSON matching this exact schema (no markdown, no commentary):
   "tone": "string - editorial tone (e.g. Analytical, Critical, Cautionary)",
   "conclusion": "string - 60-100 word conclusion",
   "takeaways": ["string", ...] // 4-6 bullet key takeaways,
+  "analysis": {
+    "issue": "1-2 sentence statement of the core problem the editorial addresses",
+    "causes": ["exactly 3 root causes drawn from the editorial"],
+    "effects": ["exactly 3 consequences or impacts discussed"],
+    "solutions": ["exactly 3 solutions, reforms, or recommendations"],
+    "author_tone": "single line (e.g. Analytical, Critical, Cautionary, Optimistic)",
+    "main_idea": "1-2 sentence main idea of the editorial",
+    "one_line_summary": "single sentence summarising the entire editorial"
+  },
   "vocabulary": [
     { "word": "string", "pos": "noun|verb|adj|adv|phrase", "hindi": "string", "english": "string - english meaning", "synonyms": "comma separated", "usage": "string - example sentence" }
   ], // 12-20 high-value words from the article
