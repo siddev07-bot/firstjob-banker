@@ -123,7 +123,7 @@ function DashboardView({ onOpen, onGenerate }: { onOpen: (a: ArticlePackage) => 
       <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(180px,1fr))", gap: 14, marginBottom: 22 }}>
         <div className="fbh-stat-card">
           <div className="fbh-stat-val">{stats.data?.totalArticles ?? "—"}</div>
-          <div className="fbh-stat-label">Total Articles Read</div>
+          <div className="fbh-stat-label">Editorials Studied</div>
         </div>
         <div className="fbh-stat-card" style={{ borderLeftColor: "var(--blue2)" }}>
           <div className="fbh-stat-val" style={{ color: "var(--blue2)" }}>{stats.data?.vocabCount ?? "—"}</div>
@@ -134,12 +134,18 @@ function DashboardView({ onOpen, onGenerate }: { onOpen: (a: ArticlePackage) => 
           <div className="fbh-stat-label">Reading Streak (days)</div>
         </div>
         <div className="fbh-stat-card" style={{ borderLeftColor: "var(--purple)" }}>
-          <div className="fbh-stat-val" style={{ color: "var(--purple)" }}>{(stats.data?.monthly ?? []).reduce((s, d) => s + d.count, 0)}</div>
-          <div className="fbh-stat-label">This Month</div>
+          <div className="fbh-stat-val" style={{ color: "var(--purple)" }}>{stats.data?.summariesCompleted ?? "—"}</div>
+          <div className="fbh-stat-label">Summaries Completed</div>
+        </div>
+        <div className="fbh-stat-card" style={{ borderLeftColor: "var(--fbh-accent)" }}>
+          <div className="fbh-stat-val" style={{ color: "var(--fbh-accent)" }}>{stats.data?.rcAccuracy ?? 0}%</div>
+          <div className="fbh-stat-label">RC / Quiz Accuracy</div>
+        </div>
+        <div className="fbh-stat-card" style={{ borderLeftColor: "var(--teal)" }}>
+          <div className="fbh-stat-val" style={{ color: "var(--teal)" }}>{stats.data?.quizzesAttempted ?? 0}</div>
+          <div className="fbh-stat-label">Quizzes Attempted</div>
         </div>
       </div>
-
-      <TodayMissionWidget />
 
       <div className="fbh-section-title">📈 Monthly Progress (Last 30 Days)</div>
       <div className="fbh-glass" style={{ padding: 16, marginBottom: 28, height: 240 }}>
@@ -154,20 +160,20 @@ function DashboardView({ onOpen, onGenerate }: { onOpen: (a: ArticlePackage) => 
         </ResponsiveContainer>
       </div>
 
-      <div className="fbh-section-title">🆕 Recent Articles</div>
+      <div className="fbh-section-title">🆕 Recent Editorials</div>
       {recent.data && recent.data.length === 0 && (
         <div className="fbh-glass" style={{ padding: 32, textAlign: "center" }}>
           <div style={{ fontSize: 40, marginBottom: 10 }}>📰</div>
-          <div style={{ fontFamily: "var(--f-display)", fontSize: 18, marginBottom: 6 }}>No articles yet</div>
-          <p style={{ color: "var(--ink4)", fontSize: 13, marginBottom: 16 }}>Generate your first editorial package to start your prep.</p>
-          <button className="fbh-btn-primary" onClick={onGenerate}>✨ Generate Now</button>
+          <div style={{ fontFamily: "var(--f-display)", fontSize: 18, marginBottom: 6 }}>No editorials yet</div>
+          <p style={{ color: "var(--ink4)", fontSize: 13, marginBottom: 16 }}>Paste your first editorial to build a full analysis, vocabulary and quiz.</p>
+          <button className="fbh-btn-primary" onClick={onGenerate}>✨ Start Now</button>
         </div>
       )}
       <div style={{ display: "grid", gap: 10 }}>
         {recent.data?.slice(0, 6).map((r: any) => (
           <button key={r.id} onClick={async () => { const full = await getFn({ data: { id: r.id } }); onOpen(full as any); }} className="fbh-glass" style={{ padding: 14, textAlign: "left", cursor: "pointer", border: "1px solid var(--border-c)" }}>
             <div style={{ fontFamily: "var(--f-display)", fontSize: 16, fontWeight: 700, color: "var(--ink)", marginBottom: 4 }}>{r.title}</div>
-            <div style={{ fontSize: 12, color: "var(--ink4)" }}>{new Date(r.created_at).toLocaleString()} · {(r.vocabulary as any[])?.length ?? 0} words · {(r.quiz as any[])?.length ?? 0} questions</div>
+            <div style={{ fontSize: 12, color: "var(--ink4)" }}>{new Date(r.created_at).toLocaleString()} · {(r.vocabulary as any[])?.length ?? 0} words · {(r.quiz as any[])?.length ?? 0} questions{r.quiz_stats?.total ? ` · ${r.quiz_stats.accuracy ?? 0}% quiz` : ""}</div>
           </button>
         ))}
       </div>
@@ -175,44 +181,6 @@ function DashboardView({ onOpen, onGenerate }: { onOpen: (a: ArticlePackage) => 
   );
 }
 
-/* ────────── TODAY'S MISSION WIDGET ────────── */
-const MISSION_SECTIONS = ["editorial", "vocabulary", "rc", "error_detection", "cloze", "sentence_improvement"] as const;
-function TodayMissionWidget() {
-  const listFn = useServerFn(listDailyMissions);
-  const q = useQuery({ queryKey: ["missions"], queryFn: () => listFn() });
-  const today = new Date().toISOString().slice(0, 10);
-  const m: any = (q.data ?? []).find((x: any) => x.mission_date === today);
-  const prog = (m?.progress ?? {}) as Record<string, { completed?: boolean; score?: number; total?: number; accuracy?: number }>;
-  const done = MISSION_SECTIONS.filter((k) => prog[k]?.completed).length;
-  const pct = Math.round((done / MISSION_SECTIONS.length) * 100);
-  const totalScore = MISSION_SECTIONS.reduce((s, k) => s + (prog[k]?.score ?? 0), 0);
-  const totalMax = MISSION_SECTIONS.reduce((s, k) => s + (prog[k]?.total ?? 0), 0);
-
-  return (
-    <div className="fbh-glass" style={{ padding: 18, marginBottom: 28, display: "flex", flexWrap: "wrap", gap: 16, alignItems: "center" }}>
-      <div style={{ flex: 1, minWidth: 220 }}>
-        <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 6 }}>
-          <span style={{ fontSize: 22 }}>🎯</span>
-          <div style={{ fontFamily: "var(--f-display)", fontSize: 18, fontWeight: 700 }}>Today's Daily Mission</div>
-        </div>
-        {m ? (
-          <>
-            <div style={{ color: "var(--ink3)", fontSize: 14, marginBottom: 8 }}>{m.title}</div>
-            <div role="progressbar" aria-valuenow={pct} aria-valuemin={0} aria-valuemax={100} aria-label="Today's mission progress" style={{ height: 8, background: "var(--border-c)", borderRadius: 4, overflow: "hidden", marginBottom: 6 }}>
-              <div style={{ width: `${pct}%`, height: "100%", background: "linear-gradient(90deg,var(--accent2),var(--fbh-accent))", transition: "width .3s" }} />
-            </div>
-            <div style={{ fontSize: 12, color: "var(--ink4)" }}>{done}/{MISSION_SECTIONS.length} sections · {pct}% complete · Score {totalScore}/{totalMax || "—"}</div>
-          </>
-        ) : (
-          <div style={{ color: "var(--ink3)", fontSize: 14 }}>No mission for today yet. Paste an editorial to build a full SBI PO session.</div>
-        )}
-      </div>
-      <Link to="/mission" className="fbh-btn-primary" style={{ textDecoration: "none" }}>
-        {m ? (pct === 100 ? "Review" : "Continue") : "Start Mission"} →
-      </Link>
-    </div>
-  );
-}
 
 /* ────────── GENERATOR ────────── */
 function GeneratorView({ onGenerated }: { onGenerated: (a: ArticlePackage) => void }) {
