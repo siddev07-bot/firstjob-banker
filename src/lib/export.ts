@@ -7,6 +7,16 @@ export interface QuizQ {
   type: "rc" | "vocab" | "cloze" | "error" | "ows";
   question: string; options: string[]; answer: number; explanation?: string;
 }
+export interface EditorialAnalysis {
+  issue?: string;
+  causes?: string[];
+  effects?: string[];
+  solutions?: string[];
+  author_tone?: string;
+  main_idea?: string;
+  one_line_summary?: string;
+}
+export interface QuizStats { score?: number; total?: number; accuracy?: number; at?: string }
 export interface ArticlePackage {
   id?: string;
   title: string;
@@ -16,9 +26,11 @@ export interface ArticlePackage {
   tone: string;
   conclusion: string;
   takeaways: string[];
+  analysis?: EditorialAnalysis;
   vocabulary: VocabEntry[];
   sbi_notes: { word: string; note: string }[];
   quiz: QuizQ[];
+  quiz_stats?: QuizStats;
   created_at?: string;
 }
 

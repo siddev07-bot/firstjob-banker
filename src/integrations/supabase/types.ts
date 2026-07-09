@@ -16,11 +16,13 @@ export type Database = {
     Tables: {
       articles: {
         Row: {
+          analysis: Json
           conclusion: string | null
           created_at: string
           full_article: string
           id: string
           quiz: Json | null
+          quiz_stats: Json
           sbi_notes: Json | null
           summary: string | null
           takeaways: Json | null
@@ -32,11 +34,13 @@ export type Database = {
           vocabulary: Json | null
         }
         Insert: {
+          analysis?: Json
           conclusion?: string | null
           created_at?: string
           full_article: string
           id?: string
           quiz?: Json | null
+          quiz_stats?: Json
           sbi_notes?: Json | null
           summary?: string | null
           takeaways?: Json | null
@@ -48,11 +52,13 @@ export type Database = {
           vocabulary?: Json | null
         }
         Update: {
+          analysis?: Json
           conclusion?: string | null
           created_at?: string
           full_article?: string
           id?: string
           quiz?: Json | null
+          quiz_stats?: Json
           sbi_notes?: Json | null
           summary?: string | null
           takeaways?: Json | null
@@ -62,75 +68,6 @@ export type Database = {
           updated_at?: string
           user_id?: string
           vocabulary?: Json | null
-        }
-        Relationships: []
-      }
-      daily_missions: {
-        Row: {
-          analysis: Json
-          cloze: Json
-          created_at: string
-          difficulty: string | null
-          error_detection: Json
-          grammar_notes: Json
-          id: string
-          key_points: Json
-          mission_date: string
-          progress: Json
-          rc_mains: Json
-          rc_prelims: Json
-          sentence_improvement: Json
-          source_text: string
-          summary: string | null
-          title: string
-          topic: string | null
-          updated_at: string
-          user_id: string
-          vocabulary: Json
-        }
-        Insert: {
-          analysis?: Json
-          cloze?: Json
-          created_at?: string
-          difficulty?: string | null
-          error_detection?: Json
-          grammar_notes?: Json
-          id?: string
-          key_points?: Json
-          mission_date?: string
-          progress?: Json
-          rc_mains?: Json
-          rc_prelims?: Json
-          sentence_improvement?: Json
-          source_text: string
-          summary?: string | null
-          title: string
-          topic?: string | null
-          updated_at?: string
-          user_id: string
-          vocabulary?: Json
-        }
-        Update: {
-          analysis?: Json
-          cloze?: Json
-          created_at?: string
-          difficulty?: string | null
-          error_detection?: Json
-          grammar_notes?: Json
-          id?: string
-          key_points?: Json
-          mission_date?: string
-          progress?: Json
-          rc_mains?: Json
-          rc_prelims?: Json
-          sentence_improvement?: Json
-          source_text?: string
-          summary?: string | null
-          title?: string
-          topic?: string | null
-          updated_at?: string
-          user_id?: string
-          vocabulary?: Json
         }
         Relationships: []
       }
