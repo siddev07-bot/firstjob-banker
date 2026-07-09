@@ -73,7 +73,6 @@ function AppPage() {
           </div>
         </div>
         <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-          <Link to="/mission" className="fbh-btn-primary" style={{ textDecoration: "none" }}>🎯 Daily Mission</Link>
           <span className="fbh-tag fbh-tag-ibps">IBPS PO</span>
           <span className="fbh-tag fbh-tag-sbi">SBI PO</span>
           <span className="fbh-tag fbh-tag-eng">English</span>
