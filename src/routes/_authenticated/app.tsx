@@ -1,4 +1,4 @@
-import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { useEffect, useMemo, useState } from "react";
@@ -6,8 +6,7 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useReadingMode } from "@/hooks/use-reading-mode";
 import { generateEditorialPackage } from "@/lib/ai.functions";
-import { saveArticle, listArticles, getArticle, deleteArticle, getDashboardStats } from "@/lib/articles.functions";
-import { listDailyMissions } from "@/lib/mission.functions";
+import { saveArticle, listArticles, getArticle, deleteArticle, getDashboardStats, saveQuizStats } from "@/lib/articles.functions";
 import { exportArticlePDF, exportVocabPDF, exportNotesPDF, printArticle, type ArticlePackage } from "@/lib/export";
 import { LineChart, Line, XAxis, YAxis, ResponsiveContainer, Tooltip, CartesianGrid } from "recharts";
 
