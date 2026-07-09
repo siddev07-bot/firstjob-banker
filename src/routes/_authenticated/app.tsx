@@ -204,6 +204,7 @@ function GeneratorView({ onGenerated }: { onGenerated: (a: ArticlePackage) => vo
           tone: pkg.tone ?? "",
           conclusion: pkg.conclusion ?? "",
           takeaways: pkg.takeaways ?? [],
+          analysis: pkg.analysis ?? { issue: "", causes: [], effects: [], solutions: [], author_tone: "", main_idea: "", one_line_summary: "" },
           vocabulary: pkg.vocabulary ?? [],
           sbi_notes: pkg.sbi_notes ?? [],
           quiz: pkg.quiz ?? [],
