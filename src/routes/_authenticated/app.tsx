@@ -458,6 +458,8 @@ function EditorialView({ a }: { a: ArticlePackage }) {
         </>
       )}
 
+      <AnalysisSection analysis={a.analysis} />
+
       <div className="fbh-section-title">📖 Full Editorial</div>
       <EditorialBody text={a.full_article} vocabulary={a.vocabulary ?? []} />
 
