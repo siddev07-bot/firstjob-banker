@@ -586,12 +586,70 @@ function VocabView({ a }: { a: ArticlePackage }) {
   );
 }
 
+/* ────────── ANALYSIS ────────── */
+function AnalysisSection({ analysis }: { analysis?: ArticlePackage["analysis"] }) {
+  if (!analysis) return null;
+  const { issue, causes, effects, solutions, author_tone, main_idea, one_line_summary } = analysis;
+  const hasAny = issue || main_idea || one_line_summary || author_tone ||
+    (causes?.length ?? 0) + (effects?.length ?? 0) + (solutions?.length ?? 0) > 0;
+  if (!hasAny) return null;
+  const List = ({ title, items, emoji }: { title: string; items?: string[]; emoji: string }) => (
+    <div className="fbh-glass" style={{ padding: 16 }}>
+      <div className="fbh-info-label" style={{ marginBottom: 8 }}>{emoji} {title}</div>
+      <ol style={{ paddingLeft: 20, margin: 0, display: "flex", flexDirection: "column", gap: 6, fontSize: 14, lineHeight: 1.55 }}>
+        {(items ?? []).map((x, i) => <li key={i}>{x}</li>)}
+      </ol>
+    </div>
+  );
+  return (
+    <>
+      <div className="fbh-section-title">🔎 Editorial Analysis</div>
+      <div style={{ display: "grid", gap: 12, marginBottom: 24 }}>
+        {issue && (
+          <div className="fbh-glass" style={{ padding: 16 }}>
+            <div className="fbh-info-label" style={{ marginBottom: 6 }}>❗ Issue</div>
+            <p style={{ margin: 0, fontSize: 14, lineHeight: 1.6 }}>{issue}</p>
+          </div>
+        )}
+        <div style={{ display: "grid", gap: 12, gridTemplateColumns: "repeat(auto-fit,minmax(240px,1fr))" }}>
+          <List title="Causes" items={causes} emoji="⚙️" />
+          <List title="Effects" items={effects} emoji="📉" />
+          <List title="Solutions" items={solutions} emoji="💡" />
+        </div>
+        <div style={{ display: "grid", gap: 12, gridTemplateColumns: "repeat(auto-fit,minmax(240px,1fr))" }}>
+          {main_idea && (
+            <div className="fbh-glass" style={{ padding: 16 }}>
+              <div className="fbh-info-label" style={{ marginBottom: 6 }}>🎯 Main Idea</div>
+              <p style={{ margin: 0, fontSize: 14, lineHeight: 1.6 }}>{main_idea}</p>
+            </div>
+          )}
+          {author_tone && (
+            <div className="fbh-glass" style={{ padding: 16 }}>
+              <div className="fbh-info-label" style={{ marginBottom: 6 }}>🎨 Author's Tone</div>
+              <p style={{ margin: 0, fontSize: 14, lineHeight: 1.6 }}>{author_tone}</p>
+            </div>
+          )}
+        </div>
+        {one_line_summary && (
+          <div className="fbh-summary-box">
+            <div className="fbh-summary-title">📝 One-Line Summary</div>
+            <p>{one_line_summary}</p>
+          </div>
+        )}
+      </div>
+    </>
+  );
+}
+
 /* ────────── QUIZ ────────── */
 function QuizView({ a }: { a: ArticlePackage }) {
   const [idx, setIdx] = useState(0);
   const [picked, setPicked] = useState<number | null>(null);
   const [score, setScore] = useState(0);
   const [answered, setAnswered] = useState<Record<number, boolean>>({});
+  const [saved, setSaved] = useState(false);
+  const qc = useQueryClient();
+  const saveStatsFn = useServerFn(saveQuizStats);
   const q = a.quiz?.[idx];
 
   const choose = (i: number) => {
@@ -605,7 +663,22 @@ function QuizView({ a }: { a: ArticlePackage }) {
   const next = () => { setPicked(null); setIdx((i) => Math.min(i + 1, (a.quiz?.length ?? 1) - 1)); };
   const prev = () => { setPicked(null); setIdx((i) => Math.max(0, i - 1)); };
 
+  const finish = async () => {
+    if (!a.id || saved) return;
+    try {
+      await saveStatsFn({ data: { id: a.id, score, total: a.quiz.length } });
+      qc.invalidateQueries({ queryKey: ["stats"] });
+      qc.invalidateQueries({ queryKey: ["articles"] });
+      setSaved(true);
+      toast.success(`Quiz saved · ${score}/${a.quiz.length}`);
+    } catch (e: any) {
+      toast.error(e.message ?? "Could not save quiz stats");
+    }
+  };
+
   if (!a.quiz || a.quiz.length === 0) return <p style={{ color: "var(--ink4)" }}>No quiz available.</p>;
+
+  const isLast = idx === a.quiz.length - 1;
 
   return (
     <div>
@@ -639,9 +712,15 @@ function QuizView({ a }: { a: ArticlePackage }) {
             {q!.explanation}
           </div>
         )}
-        <div style={{ display: "flex", justifyContent: "space-between", marginTop: 18 }}>
+        <div style={{ display: "flex", justifyContent: "space-between", marginTop: 18, gap: 8, flexWrap: "wrap" }}>
           <button className="fbh-btn" onClick={prev} disabled={idx === 0}>← Previous</button>
-          <button className="fbh-btn-primary" onClick={next} disabled={idx === a.quiz.length - 1}>Next →</button>
+          {isLast ? (
+            <button className="fbh-btn-primary" onClick={finish} disabled={saved}>
+              {saved ? `✅ Saved · ${score}/${a.quiz.length}` : `🏁 Finish & Save · ${score}/${a.quiz.length}`}
+            </button>
+          ) : (
+            <button className="fbh-btn-primary" onClick={next}>Next →</button>
+          )}
         </div>
       </div>
     </div>
