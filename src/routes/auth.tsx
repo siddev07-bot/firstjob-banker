@@ -6,12 +6,20 @@ import { toast } from "sonner";
 
 export const Route = createFileRoute("/auth")({
   ssr: false,
+  validateSearch: (s: Record<string, unknown>) => ({
+    next: typeof s.next === "string" && s.next.startsWith("/") && !s.next.startsWith("//") ? s.next : undefined,
+  }),
   head: () => ({ meta: [{ title: "Sign in — FirstJob Banker" }] }),
   component: AuthPage,
 });
 
 function AuthPage() {
   const navigate = useNavigate();
+  const { next } = Route.useSearch();
+  const goNext = () => {
+    if (next) window.location.href = next;
+    else navigate({ to: "/app", replace: true });
+  };
   const [mode, setMode] = useState<"signin" | "signup">("signin");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -19,16 +27,17 @@ function AuthPage() {
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data }) => {
-      if (data.user) navigate({ to: "/app", replace: true });
+      if (data.user) goNext();
     });
-  }, [navigate]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [navigate, next]);
 
   const onGoogle = async () => {
     setBusy(true);
-    const r = await lovable.auth.signInWithOAuth("google", { redirect_uri: window.location.origin + "/app" });
+    const r = await lovable.auth.signInWithOAuth("google", { redirect_uri: window.location.origin + (next ?? "/app") });
     if (r.error) { toast.error(r.error.message); setBusy(false); return; }
     if (r.redirected) return;
-    navigate({ to: "/app", replace: true });
+    goNext();
   };
 
   const onEmail = async (e: React.FormEvent) => {
@@ -38,7 +47,7 @@ function AuthPage() {
       if (mode === "signup") {
         const { error } = await supabase.auth.signUp({
           email, password,
-          options: { emailRedirectTo: window.location.origin + "/app" },
+          options: { emailRedirectTo: window.location.origin + (next ?? "/app") },
         });
         if (error) throw error;
         toast.success("Account created. Check your email to confirm, then sign in.");
@@ -46,7 +55,7 @@ function AuthPage() {
       } else {
         const { error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) throw error;
-        navigate({ to: "/app", replace: true });
+        goNext();
       }
     } catch (err: any) {
       toast.error(err.message ?? "Authentication failed");
