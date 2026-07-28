@@ -1,0 +1,161 @@
+{
+  "version": 1,
+  "sdk_version": "0.24.0",
+  "path": "/mcp",
+  "auth": {
+    "type": "oauth",
+    "issuer": "https://czabqjlvtjmhbkiioaor.supabase.co/auth/v1",
+    "accepted_audiences": [
+      "authenticated"
+    ]
+  },
+  "mcp": {
+    "server": {
+      "name": "firstjob-banker-mcp",
+      "version": "0.1.0",
+      "title": "FirstJob Banker"
+    },
+    "tools": [
+      {
+        "name": "list_editorials",
+        "title": "List editorials",
+        "description": "List the signed-in user's saved editorial studies (newest first), with title, theme, tone and date. Optionally filter by a search term.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "search": {
+              "type": "string",
+              "description": "Optional text to match against editorial titles."
+            },
+            "limit": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 50,
+              "description": "Maximum number of editorials to return (default 20)."
+            }
+          },
+          "additionalProperties": false,
+          "$schema": "http://json-schema.org/draft-07/schema#"
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "get_editorial",
+        "title": "Get editorial study",
+        "description": "Fetch one saved editorial study by id, including its summary, structured analysis (issue, causes, effects, solutions), takeaways, SBI PO notes and quiz stats.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "format": "uuid",
+              "description": "The editorial id returned by list_editorials."
+            },
+            "include_full_text": {
+              "type": "boolean",
+              "description": "Include the full pasted editorial text (default false)."
+            }
+          },
+          "required": [
+            "id"
+          ],
+          "additionalProperties": false,
+          "$schema": "http://json-schema.org/draft-07/schema#"
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "get_vocabulary",
+        "title": "Get vocabulary",
+        "description": "Get vocabulary words (word, part of speech, Hindi and English meaning, synonyms, usage) from the user's saved editorials. Give an editorial id for one study, or omit it to pull recent words across studies.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "editorial_id": {
+              "type": "string",
+              "format": "uuid",
+              "description": "Editorial id to pull vocabulary from."
+            },
+            "limit": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 20,
+              "description": "How many recent editorials to pull from when no id is given (default 5)."
+            }
+          },
+          "additionalProperties": false,
+          "$schema": "http://json-schema.org/draft-07/schema#"
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "get_quiz_questions",
+        "title": "Get quiz questions",
+        "description": "Get the practice questions (RC, vocabulary, cloze, error detection, one-word substitution) generated for a saved editorial, with options, answers and explanations.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "editorial_id": {
+              "type": "string",
+              "format": "uuid",
+              "description": "Editorial id returned by list_editorials."
+            },
+            "type": {
+              "type": "string",
+              "enum": [
+                "rc",
+                "vocab",
+                "cloze",
+                "error",
+                "ows"
+              ],
+              "description": "Filter to a single question type."
+            }
+          },
+          "required": [
+            "editorial_id"
+          ],
+          "additionalProperties": false,
+          "$schema": "http://json-schema.org/draft-07/schema#"
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "get_study_stats",
+        "title": "Get study stats",
+        "description": "Get the signed-in user's overall preparation progress: editorials studied, vocabulary words learned, quizzes attempted and average quiz accuracy.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "$schema": "http://json-schema.org/draft-07/schema#",
+          "type": "object",
+          "properties": {}
+        },
+        "outputSchema": null
+      }
+    ]
+  }
+}
