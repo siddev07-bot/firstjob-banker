@@ -7,17 +7,30 @@ const VocabEntry = z.object({
   pos: z.string().optional().default("noun"),
   hindi: z.string().optional().default(""),
   english: z.string().optional().default(""),
-  synonyms: z.string().optional().default(""),
+  synonyms: z.union([z.string(), z.array(z.string())]).optional().default("").transform((v) => (Array.isArray(v) ? v.join(", ") : v)),
   usage: z.string().optional().default(""),
 });
-const SbiNote = z.object({ word: z.string(), note: z.string() });
+const SbiNote = z.object({ word: z.string(), note: z.string().optional().default("") });
 const QuizQ = z.object({
-  type: z.enum(["rc", "vocab", "cloze", "error", "ows"]).default("vocab"),
+  type: z.enum(["rc", "vocab", "cloze", "error", "ows"]).catch("vocab").default("vocab"),
   question: z.string(),
-  options: z.array(z.string()).length(4),
-  answer: z.number().int().min(0).max(3),
+  options: z.array(z.string()).min(2),
+  answer: z.coerce.number().int().min(0).catch(0).default(0),
   explanation: z.string().optional().default(""),
 });
+
+/** AI output is best-effort: drop malformed entries instead of failing the whole save. */
+function lenientArray<T extends z.ZodTypeAny>(schema: T) {
+  return z.preprocess(
+    (v) => (Array.isArray(v) ? v.filter((item) => schema.safeParse(item).success) : []),
+    z.array(schema).default([]),
+  );
+}
+const StringList = z.preprocess(
+  (v) => (Array.isArray(v) ? v.filter((s) => typeof s === "string") : []),
+  z.array(z.string()).default([]),
+);
+
 
 const Analysis = z.object({
   issue: z.string().default(""),
