@@ -7,26 +7,42 @@ const VocabEntry = z.object({
   pos: z.string().optional().default("noun"),
   hindi: z.string().optional().default(""),
   english: z.string().optional().default(""),
-  synonyms: z.string().optional().default(""),
+  synonyms: z.union([z.string(), z.array(z.string())]).optional().default("").transform((v) => (Array.isArray(v) ? v.join(", ") : v)),
   usage: z.string().optional().default(""),
 });
-const SbiNote = z.object({ word: z.string(), note: z.string() });
+const SbiNote = z.object({ word: z.string(), note: z.string().optional().default("") });
 const QuizQ = z.object({
-  type: z.enum(["rc", "vocab", "cloze", "error", "ows"]).default("vocab"),
+  type: z.enum(["rc", "vocab", "cloze", "error", "ows"]).catch("vocab").default("vocab"),
   question: z.string(),
-  options: z.array(z.string()).length(4),
-  answer: z.number().int().min(0).max(3),
+  options: z.array(z.string()).min(2),
+  answer: z.coerce.number().int().min(0).catch(0).default(0),
   explanation: z.string().optional().default(""),
 });
 
+/** AI output is best-effort: drop malformed entries instead of failing the whole save. */
+function lenientArray<T extends z.ZodTypeAny>(schema: T) {
+  return z.preprocess(
+    (v) => (Array.isArray(v) ? v.filter((item) => schema.safeParse(item).success) : []),
+    z.array(schema).default([]),
+  );
+}
+const StringList = z.preprocess(
+  (v) => (Array.isArray(v) ? v.filter((s) => typeof s === "string") : []),
+  z.array(z.string()).default([]),
+);
+
+
 const Analysis = z.object({
-  issue: z.string().default(""),
-  causes: z.array(z.string()).default([]),
-  effects: z.array(z.string()).default([]),
-  solutions: z.array(z.string()).default([]),
-  author_tone: z.string().default(""),
-  main_idea: z.string().default(""),
-  one_line_summary: z.string().default(""),
+  issue: z.string().catch("").default(""),
+  causes: StringList,
+  effects: StringList,
+  solutions: StringList,
+  author_tone: z.string().catch("").default(""),
+  main_idea: z.string().catch("").default(""),
+  one_line_summary: z.string().catch("").default(""),
+}).catch({
+  issue: "", causes: [], effects: [], solutions: [],
+  author_tone: "", main_idea: "", one_line_summary: "",
 }).default({
   issue: "", causes: [], effects: [], solutions: [],
   author_tone: "", main_idea: "", one_line_summary: "",
@@ -39,12 +55,13 @@ const SavePayload = z.object({
   theme: z.string().optional().default(""),
   tone: z.string().optional().default(""),
   conclusion: z.string().optional().default(""),
-  takeaways: z.array(z.string()).default([]),
+  takeaways: StringList,
   analysis: Analysis,
-  vocabulary: z.array(VocabEntry).default([]),
-  sbi_notes: z.array(SbiNote).default([]),
-  quiz: z.array(QuizQ).default([]),
+  vocabulary: lenientArray(VocabEntry),
+  sbi_notes: lenientArray(SbiNote),
+  quiz: lenientArray(QuizQ),
 });
+
 
 function logAndThrow(op: string, error: unknown): never {
   console.error(`[articles.${op}]`, error);
