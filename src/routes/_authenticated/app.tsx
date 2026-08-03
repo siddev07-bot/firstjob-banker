@@ -197,7 +197,7 @@ function GeneratorView({ onGenerated }: { onGenerated: (a: ArticlePackage) => vo
       setProgress("Saving to your library…");
       const saved = await saveFn({
         data: {
-          title: pkg.title || text.slice(0, 60),
+          title: String(pkg.title || text.slice(0, 60)).slice(0, 300),
           full_article: text,
           summary: pkg.summary ?? "",
           theme: pkg.theme ?? "",
