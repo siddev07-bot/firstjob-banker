@@ -33,13 +33,16 @@ const StringList = z.preprocess(
 
 
 const Analysis = z.object({
-  issue: z.string().default(""),
-  causes: z.array(z.string()).default([]),
-  effects: z.array(z.string()).default([]),
-  solutions: z.array(z.string()).default([]),
-  author_tone: z.string().default(""),
-  main_idea: z.string().default(""),
-  one_line_summary: z.string().default(""),
+  issue: z.string().catch("").default(""),
+  causes: StringList,
+  effects: StringList,
+  solutions: StringList,
+  author_tone: z.string().catch("").default(""),
+  main_idea: z.string().catch("").default(""),
+  one_line_summary: z.string().catch("").default(""),
+}).catch({
+  issue: "", causes: [], effects: [], solutions: [],
+  author_tone: "", main_idea: "", one_line_summary: "",
 }).default({
   issue: "", causes: [], effects: [], solutions: [],
   author_tone: "", main_idea: "", one_line_summary: "",
@@ -52,12 +55,13 @@ const SavePayload = z.object({
   theme: z.string().optional().default(""),
   tone: z.string().optional().default(""),
   conclusion: z.string().optional().default(""),
-  takeaways: z.array(z.string()).default([]),
+  takeaways: StringList,
   analysis: Analysis,
-  vocabulary: z.array(VocabEntry).default([]),
-  sbi_notes: z.array(SbiNote).default([]),
-  quiz: z.array(QuizQ).default([]),
+  vocabulary: lenientArray(VocabEntry),
+  sbi_notes: lenientArray(SbiNote),
+  quiz: lenientArray(QuizQ),
 });
+
 
 function logAndThrow(op: string, error: unknown): never {
   console.error(`[articles.${op}]`, error);
