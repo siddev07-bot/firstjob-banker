@@ -203,3 +203,190 @@ export const getDashboardStats = createServerFn({ method: "GET" })
       quizzesAttempted,
     };
   });
+
+/* ────────── QUIZ PROGRESS (persistent) ────────── */
+
+const AnswerEntry = z.object({
+  picked: z.number().int().min(0),
+  correct: z.boolean(),
+  type: z.string().default("vocab"),
+});
+
+const SaveProgress = z.object({
+  articleId: z.string().uuid(),
+  answers: z.record(z.string(), AnswerEntry),
+  total: z.number().int().min(0),
+  timeSpentSeconds: z.number().int().min(0).default(0),
+  completed: z.boolean().default(false),
+});
+
+export const getQuizProgress = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) => z.object({ articleId: z.string().uuid() }).parse(d))
+  .handler(async ({ data, context }) => {
+    const { data: row, error } = await context.supabase
+      .from("quiz_attempts")
+      .select("*")
+      .eq("article_id", data.articleId)
+      .maybeSingle();
+    if (error) logAndThrow("load quiz progress", error);
+    return row ?? null;
+  });
+
+export const saveQuizProgress = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) => SaveProgress.parse(d))
+  .handler(async ({ data, context }) => {
+    const { supabase, userId } = context;
+    const entries = Object.values(data.answers);
+    const attempted = entries.length;
+    const score = entries.filter((e) => e.correct).length;
+    const accuracy = attempted ? Math.round((score / attempted) * 100) : 0;
+    const now = new Date().toISOString();
+
+    const { data: row, error } = await supabase
+      .from("quiz_attempts")
+      .upsert(
+        {
+          user_id: userId,
+          article_id: data.articleId,
+          answers: data.answers as never,
+          attempted,
+          score,
+          total: data.total,
+          time_spent_seconds: data.timeSpentSeconds,
+          completed: data.completed || (data.total > 0 && attempted >= data.total),
+          last_attempted_at: now,
+        },
+        { onConflict: "user_id,article_id" },
+      )
+      .select()
+      .single();
+    if (error) logAndThrow("save quiz progress", error);
+
+    const { error: statErr } = await supabase
+      .from("articles")
+      .update({
+        quiz_stats: { score, total: data.total, attempted, accuracy, at: now } as never,
+      })
+      .eq("id", data.articleId);
+    if (statErr) logAndThrow("save quiz progress", statErr);
+
+    return row;
+  });
+
+export const resetQuizProgress = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) => z.object({ articleId: z.string().uuid() }).parse(d))
+  .handler(async ({ data, context }) => {
+    const { supabase } = context;
+    const { error } = await supabase.from("quiz_attempts").delete().eq("article_id", data.articleId);
+    if (error) logAndThrow("reset quiz", error);
+    const { error: e2 } = await supabase
+      .from("articles")
+      .update({ quiz_stats: {} as never })
+      .eq("id", data.articleId);
+    if (e2) logAndThrow("reset quiz", e2);
+    return { ok: true };
+  });
+
+export const listQuizProgress = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const { data, error } = await context.supabase
+      .from("quiz_attempts")
+      .select("article_id,score,attempted,total,completed,accuracy:score,time_spent_seconds,last_attempted_at")
+      .order("last_attempted_at", { ascending: false });
+    if (error) logAndThrow("load quiz progress", error);
+    return data ?? [];
+  });
+
+export const getQuizAnalytics = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const { supabase, userId } = context;
+    const [{ data: attempts, error }, { data: articles }, { data: logRows }] = await Promise.all([
+      supabase.from("quiz_attempts").select("*").order("last_attempted_at", { ascending: false }),
+      supabase.from("articles").select("id,title,quiz"),
+      supabase.from("reading_log").select("read_date").eq("user_id", userId).order("read_date", { ascending: false }).limit(730),
+    ]);
+    if (error) logAndThrow("load analytics", error);
+
+    const titleById = new Map((articles ?? []).map((a) => [a.id, a.title]));
+    const quizLenById = new Map(
+      (articles ?? []).map((a) => [a.id, Array.isArray(a.quiz) ? a.quiz.length : 0]),
+    );
+
+    const sections: Record<string, { attempted: number; correct: number }> = {};
+    let totalQuestions = 0;
+    let totalCorrect = 0;
+    let totalTime = 0;
+
+    const perEditorial = (attempts ?? []).map((row) => {
+      const answers = (row.answers ?? {}) as Record<string, { correct?: boolean; type?: string }>;
+      for (const entry of Object.values(answers)) {
+        const key = entry?.type ?? "vocab";
+        const s = (sections[key] ??= { attempted: 0, correct: 0 });
+        s.attempted += 1;
+        if (entry?.correct) s.correct += 1;
+      }
+      totalQuestions += row.attempted;
+      totalCorrect += row.score;
+      totalTime += row.time_spent_seconds;
+      const total = row.total || quizLenById.get(row.article_id) || 0;
+      return {
+        articleId: row.article_id,
+        title: titleById.get(row.article_id) ?? "Untitled editorial",
+        date: row.last_attempted_at,
+        total,
+        attempted: row.attempted,
+        correct: row.score,
+        wrong: row.attempted - row.score,
+        accuracy: row.attempted ? Math.round((row.score / row.attempted) * 100) : 0,
+        completed: row.completed,
+        timeSpentSeconds: row.time_spent_seconds,
+      };
+    });
+
+    const sectionStats = Object.entries(sections).map(([type, s]) => ({
+      type,
+      attempted: s.attempted,
+      correct: s.correct,
+      wrong: s.attempted - s.correct,
+      accuracy: s.attempted ? Math.round((s.correct / s.attempted) * 100) : 0,
+    }));
+
+    // Streaks from reading log
+    const days = Array.from(new Set((logRows ?? []).map((r) => r.read_date))).sort();
+    let best = 0;
+    let run = 0;
+    let prev: Date | null = null;
+    for (const d of days) {
+      const cur = new Date(`${d}T00:00:00Z`);
+      run = prev && (cur.getTime() - prev.getTime()) / 86400000 === 1 ? run + 1 : 1;
+      if (run > best) best = run;
+      prev = cur;
+    }
+    const daySet = new Set(days);
+    let streak = 0;
+    const walker = new Date();
+    while (daySet.has(walker.toISOString().slice(0, 10))) {
+      streak += 1;
+      walker.setUTCDate(walker.getUTCDate() - 1);
+    }
+
+    return {
+      overall: {
+        editorialsAttempted: perEditorial.length,
+        questionsSolved: totalQuestions,
+        correct: totalCorrect,
+        wrong: totalQuestions - totalCorrect,
+        accuracy: totalQuestions ? Math.round((totalCorrect / totalQuestions) * 100) : 0,
+        timeSpentSeconds: totalTime,
+        streak,
+        bestStreak: best,
+      },
+      sections: sectionStats,
+      editorials: perEditorial,
+    };
+  });
