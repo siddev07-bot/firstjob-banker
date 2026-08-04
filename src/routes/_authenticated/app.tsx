@@ -6,7 +6,8 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useReadingMode } from "@/hooks/use-reading-mode";
 import { generateEditorialPackage } from "@/lib/ai.functions";
-import { saveArticle, listArticles, getArticle, deleteArticle, getDashboardStats, saveQuizStats } from "@/lib/articles.functions";
+import { saveArticle, listArticles, getArticle, deleteArticle, getDashboardStats, getQuizProgress, saveQuizProgress, resetQuizProgress, listQuizProgress, getQuizAnalytics } from "@/lib/articles.functions";
+import { labelFor } from "@/lib/quiz-types";
 import { exportArticlePDF, exportVocabPDF, exportNotesPDF, printArticle, type ArticlePackage } from "@/lib/export";
 import { LineChart, Line, XAxis, YAxis, ResponsiveContainer, Tooltip, CartesianGrid } from "recharts";
 
@@ -14,7 +15,7 @@ export const Route = createFileRoute("/_authenticated/app")({
   component: AppPage,
 });
 
-type Tab = "dashboard" | "generate" | "history" | "editorial" | "vocab" | "quiz" | "flashcards";
+type Tab = "dashboard" | "generate" | "history" | "editorial" | "vocab" | "quiz" | "flashcards" | "analytics";
 
 function ReadingModeToggle() {
   const { mode, setMode } = useReadingMode();
@@ -91,6 +92,7 @@ function AppPage() {
           <button role="tab" aria-selected={tab === "vocab"} className={`fbh-tab text-lg ${tab === "vocab" ? "active" : ""}`} onClick={() => setTab("vocab")} disabled={!current}>📚 Vocabulary</button>
           <button role="tab" aria-selected={tab === "quiz"} className={`fbh-tab text-lg ${tab === "quiz" ? "active" : ""}`} onClick={() => setTab("quiz")} disabled={!current}>📝 Quiz</button>
           <button role="tab" aria-selected={tab === "flashcards"} className={`fbh-tab text-lg ${tab === "flashcards" ? "active" : ""}`} onClick={() => setTab("flashcards")} disabled={!current}>🎴 Flashcards</button>
+          <button role="tab" aria-selected={tab === "analytics"} className={`fbh-tab text-lg ${tab === "analytics" ? "active" : ""}`} onClick={() => setTab("analytics")}>📈 Progress</button>
         </nav>
 
         {tab === "dashboard" && <DashboardView onOpen={openArticle} onGenerate={() => setTab("generate")} />}
@@ -100,6 +102,7 @@ function AppPage() {
         {tab === "vocab" && current && <VocabView a={current} />}
         {tab === "quiz" && current && <QuizView a={current} />}
         {tab === "flashcards" && current && <FlashcardView a={current} />}
+        {tab === "analytics" && <AnalyticsView onOpen={openArticle} />}
       </main>
     </div>
   );
@@ -329,7 +332,13 @@ function HistoryView({ onOpen }: { onOpen: (a: ArticlePackage) => void }) {
   const getFn = useServerFn(getArticle);
   const delFn = useServerFn(deleteArticle);
   const qc = useQueryClient();
+  const listProgressFn = useServerFn(listQuizProgress);
   const list = useQuery({ queryKey: ["articles"], queryFn: () => listFn() });
+  const prog = useQuery({ queryKey: ["quiz-progress-list"], queryFn: () => listProgressFn() });
+  const progressById = useMemo(
+    () => new Map<string, any>((prog.data ?? []).map((r: any) => [r.article_id, r])),
+    [prog.data],
+  );
   const [q, setQ] = useState("");
   const [date, setDate] = useState("");
 
@@ -381,6 +390,7 @@ function HistoryView({ onOpen }: { onOpen: (a: ArticlePackage) => void }) {
               <div style={{ fontSize: 12, color: "var(--ink4)", marginTop: 2 }}>
                 {new Date(a.created_at).toLocaleString()} · {(a.vocabulary as any[])?.length ?? 0} words · {(a.quiz as any[])?.length ?? 0} questions
               </div>
+              <QuizBadge p={progressById.get(a.id)} total={(a.quiz as any[])?.length ?? 0} />
             </div>
             <button className="fbh-btn" aria-label={`Open article: ${a.title}`} onClick={async () => onOpen((await getFn({ data: { id: a.id } })) as any)}>Open</button>
             <button className="fbh-btn" aria-label={`Delete article: ${a.title}`} onClick={() => remove(a.id)} style={{ color: "var(--fbh-accent)" }}>🗑</button>
@@ -641,58 +651,165 @@ function AnalysisSection({ analysis }: { analysis?: ArticlePackage["analysis"] }
   );
 }
 
-/* ────────── QUIZ ────────── */
+/* ────────── QUIZ (persistent) ────────── */
+type AnswerMap = Record<string, { picked: number; correct: boolean; type: string }>;
+
+function fmtTime(sec: number) {
+  const m = Math.floor(sec / 60);
+  const s = sec % 60;
+  return `${m}m ${String(s).padStart(2, "0")}s`;
+}
+
 function QuizView({ a }: { a: ArticlePackage }) {
-  const [idx, setIdx] = useState(0);
-  const [picked, setPicked] = useState<number | null>(null);
-  const [score, setScore] = useState(0);
-  const [answered, setAnswered] = useState<Record<number, boolean>>({});
-  const [saved, setSaved] = useState(false);
   const qc = useQueryClient();
-  const saveStatsFn = useServerFn(saveQuizStats);
-  const q = a.quiz?.[idx];
+  const getProgressFn = useServerFn(getQuizProgress);
+  const saveProgressFn = useServerFn(saveQuizProgress);
+  const resetFn = useServerFn(resetQuizProgress);
 
-  const choose = (i: number) => {
-    if (picked != null) return;
-    setPicked(i);
-    if (i === q!.answer && !answered[idx]) {
-      setScore((s) => s + 1);
-      setAnswered({ ...answered, [idx]: true });
-    }
-  };
-  const next = () => { setPicked(null); setIdx((i) => Math.min(i + 1, (a.quiz?.length ?? 1) - 1)); };
-  const prev = () => { setPicked(null); setIdx((i) => Math.max(0, i - 1)); };
+  const articleId = a.id ?? "";
+  const total = a.quiz?.length ?? 0;
 
-  const finish = async () => {
-    if (!a.id || saved) return;
-    try {
-      await saveStatsFn({ data: { id: a.id, score, total: a.quiz.length } });
+  const progress = useQuery({
+    queryKey: ["quiz-progress", articleId],
+    queryFn: () => getProgressFn({ data: { articleId } }),
+    enabled: !!articleId,
+    staleTime: 60_000,
+  });
+
+  const [idx, setIdx] = useState(0);
+  const [answers, setAnswers] = useState<AnswerMap>({});
+  const [baseTime, setBaseTime] = useState(0);
+  const [sessionTime, setSessionTime] = useState(0);
+  const [hydrated, setHydrated] = useState(false);
+
+  // Restore saved progress once per article.
+  useEffect(() => {
+    setHydrated(false);
+    setIdx(0);
+    setAnswers({});
+    setSessionTime(0);
+  }, [articleId]);
+
+  useEffect(() => {
+    if (hydrated || progress.isLoading) return;
+    const row: any = progress.data;
+    setAnswers((row?.answers as AnswerMap) ?? {});
+    setBaseTime(row?.time_spent_seconds ?? 0);
+    const answered = Object.keys((row?.answers as AnswerMap) ?? {}).length;
+    if (answered > 0 && answered < total) setIdx(answered);
+    setHydrated(true);
+  }, [progress.data, progress.isLoading, hydrated, total]);
+
+  useEffect(() => {
+    const t = setInterval(() => setSessionTime((s) => s + 1), 1000);
+    return () => clearInterval(t);
+  }, [articleId]);
+
+  const save = useMutation({
+    mutationFn: (next: AnswerMap) =>
+      saveProgressFn({
+        data: {
+          articleId,
+          answers: next,
+          total,
+          timeSpentSeconds: baseTime + sessionTime,
+          completed: Object.keys(next).length >= total,
+        },
+      }),
+    onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["stats"] });
       qc.invalidateQueries({ queryKey: ["articles"] });
-      setSaved(true);
-      toast.success(`Quiz saved · ${score}/${a.quiz.length}`);
+      qc.invalidateQueries({ queryKey: ["quiz-analytics"] });
+      qc.invalidateQueries({ queryKey: ["quiz-progress-list"] });
+    },
+    onError: (e: any) => toast.error(e?.message ?? "Could not save your answer"),
+  });
+
+  const reset = async () => {
+    if (!confirm("Are you sure you want to reset this quiz? This action cannot be undone.")) return;
+    try {
+      await resetFn({ data: { articleId } });
+      setAnswers({});
+      setIdx(0);
+      setBaseTime(0);
+      setSessionTime(0);
+      qc.setQueryData(["quiz-progress", articleId], null);
+      qc.invalidateQueries({ queryKey: ["stats"] });
+      qc.invalidateQueries({ queryKey: ["articles"] });
+      qc.invalidateQueries({ queryKey: ["quiz-analytics"] });
+      toast.success("Quiz reset");
     } catch (e: any) {
-      toast.error(e.message ?? "Could not save quiz stats");
+      toast.error(e?.message ?? "Could not reset quiz");
     }
   };
 
-  if (!a.quiz || a.quiz.length === 0) return <p style={{ color: "var(--ink4)" }}>No quiz available.</p>;
+  const q = a.quiz?.[idx];
+  const attemptedCount = Object.keys(answers).length;
+  const score = useMemo(() => Object.values(answers).filter((v) => v.correct).length, [answers]);
+  const current = answers[String(idx)];
+  const picked = current?.picked ?? null;
 
-  const isLast = idx === a.quiz.length - 1;
+  const choose = (i: number) => {
+    if (!q || picked != null) return;
+    const next: AnswerMap = {
+      ...answers,
+      [String(idx)]: { picked: i, correct: i === q.answer, type: q.type ?? "vocab" },
+    };
+    setAnswers(next);
+    if (articleId) save.mutate(next);
+  };
+
+  if (!a.quiz || total === 0) return <p style={{ color: "var(--ink4)" }}>No quiz available.</p>;
+  if (!hydrated) return <p style={{ color: "var(--ink4)" }}>Restoring your progress…</p>;
+
+  const accuracy = attemptedCount ? Math.round((score / attemptedCount) * 100) : 0;
+  const pct = Math.round((attemptedCount / total) * 100);
 
   return (
     <div>
       <div className="fbh-meta-row">
         <span className="fbh-meta-badge">Quiz</span>
         <span className="fbh-meta-dot" />
-        <span>Question {idx + 1} of {a.quiz.length}</span>
+        <span>Question {idx + 1} of {total}</span>
         <span className="fbh-meta-dot" />
-        <span>Score: {score}/{a.quiz.length}</span>
+        <span>Score: {score}/{total}</span>
+        <span className="fbh-meta-dot" />
+        <span>Accuracy: {accuracy}%</span>
+        <span className="fbh-meta-dot" />
+        <span>⏱ {fmtTime(baseTime + sessionTime)}</span>
+      </div>
+
+      <div className="fbh-glass" style={{ padding: 14, marginBottom: 14 }}>
+        <div style={{ display: "flex", justifyContent: "space-between", fontSize: 12, color: "var(--ink4)", marginBottom: 6 }}>
+          <span>Progress: {attemptedCount}/{total} attempted{attemptedCount >= total ? " · ✅ Completed" : ""}</span>
+          <span>{save.isPending ? "Saving…" : "Saved automatically"}</span>
+        </div>
+        <div role="progressbar" aria-valuenow={pct} aria-valuemin={0} aria-valuemax={100} aria-label="Quiz progress" style={{ height: 8, borderRadius: 6, background: "var(--border-c)", overflow: "hidden" }}>
+          <div style={{ width: `${pct}%`, height: "100%", background: "var(--fbh-accent)" }} />
+        </div>
+        <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginTop: 12 }}>
+          {a.quiz.map((_, i) => {
+            const ans = answers[String(i)];
+            const bg = !ans ? "transparent" : ans.correct ? "var(--green)" : "var(--fbh-accent)";
+            const color = ans ? "#fff" : "var(--ink4)";
+            return (
+              <button
+                key={i}
+                onClick={() => setIdx(i)}
+                aria-label={`Go to question ${i + 1}`}
+                aria-current={i === idx}
+                style={{ width: 30, height: 30, borderRadius: 8, fontSize: 11, fontWeight: 700, background: bg, color, border: i === idx ? "2px solid var(--ink)" : "1px solid var(--border-c)", cursor: "pointer" }}
+              >
+                {i + 1}
+              </button>
+            );
+          })}
+        </div>
       </div>
 
       <div className="fbh-glass" style={{ padding: 22 }}>
         <div style={{ display: "inline-flex", alignItems: "center", gap: 6, fontSize: 11, fontWeight: 800, textTransform: "uppercase", letterSpacing: ".5px", color: "var(--fbh-accent)", background: "rgba(245,158,11,.08)", padding: "4px 10px", borderRadius: 20, marginBottom: 12 }}>
-          {q!.type.toUpperCase()} · Q{idx + 1}
+          {labelFor(q!.type)} · Q{idx + 1}
         </div>
         <div style={{ fontFamily: "var(--f-display)", fontSize: 17, fontWeight: 600, color: "var(--ink)", lineHeight: 1.6, marginBottom: 16 }}>{q!.question}</div>
         <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
@@ -713,14 +830,11 @@ function QuizView({ a }: { a: ArticlePackage }) {
           </div>
         )}
         <div style={{ display: "flex", justifyContent: "space-between", marginTop: 18, gap: 8, flexWrap: "wrap" }}>
-          <button className="fbh-btn" onClick={prev} disabled={idx === 0}>← Previous</button>
-          {isLast ? (
-            <button className="fbh-btn-primary" onClick={finish} disabled={saved}>
-              {saved ? `✅ Saved · ${score}/${a.quiz.length}` : `🏁 Finish & Save · ${score}/${a.quiz.length}`}
-            </button>
-          ) : (
-            <button className="fbh-btn-primary" onClick={next}>Next →</button>
-          )}
+          <button className="fbh-btn" onClick={() => setIdx((i) => Math.max(0, i - 1))} disabled={idx === 0}>← Previous</button>
+          <div style={{ display: "flex", gap: 8 }}>
+            <button className="fbh-btn" onClick={reset} style={{ color: "var(--fbh-accent)" }}>♻️ Reset Quiz</button>
+            <button className="fbh-btn-primary" onClick={() => setIdx((i) => Math.min(i + 1, total - 1))} disabled={idx === total - 1}>Next →</button>
+          </div>
         </div>
       </div>
     </div>
@@ -880,6 +994,120 @@ function FlashcardView({ a }: { a: ArticlePackage }) {
           </div>
         </>
       )}
+    </div>
+  );
+}
+
+/* ────────── QUIZ PROGRESS BADGE ────────── */
+function QuizBadge({ p, total }: { p?: any; total: number }) {
+  if (!p || !p.attempted) {
+    return (
+      <div style={{ marginTop: 6, fontSize: 11, fontWeight: 700, color: "var(--ink4)" }}>
+        ⬜ Quiz not started
+      </div>
+    );
+  }
+  const t = p.total || total || p.attempted;
+  const done = p.completed || (t > 0 && p.attempted >= t);
+  const acc = p.attempted ? Math.round((p.score / p.attempted) * 100) : 0;
+  return (
+    <div style={{ marginTop: 6, display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap", fontSize: 11, fontWeight: 700 }}>
+      <span style={{ padding: "2px 8px", borderRadius: 20, background: done ? "rgba(16,185,129,.12)" : "rgba(245,158,11,.12)", color: done ? "var(--green)" : "var(--fbh-accent)" }}>
+        {done ? "✅ Completed" : "🕓 In progress"}
+      </span>
+      <span style={{ color: "var(--ink4)" }}>{p.attempted}/{t} attempted · {acc}% accuracy</span>
+    </div>
+  );
+}
+
+/* ────────── PROGRESS / ANALYTICS ────────── */
+function AnalyticsView({ onOpen }: { onOpen: (a: ArticlePackage) => void }) {
+  const analyticsFn = useServerFn(getQuizAnalytics);
+  const getFn = useServerFn(getArticle);
+  const { data, isLoading } = useQuery({ queryKey: ["quiz-analytics"], queryFn: () => analyticsFn() });
+
+  if (isLoading) return <p style={{ color: "var(--ink4)" }}>Loading your progress…</p>;
+  if (!data) return null;
+
+  const o = data.overall;
+  const sections = [...data.sections].sort((a, b) => b.attempted - a.attempted);
+  const weakest = [...sections].filter((s) => s.attempted >= 3).sort((a, b) => a.accuracy - b.accuracy).slice(0, 3);
+
+  const cards = [
+    { label: "Editorials attempted", value: o.editorialsAttempted, icon: "📰" },
+    { label: "Questions solved", value: o.questionsSolved, icon: "📝" },
+    { label: "Correct", value: o.correct, icon: "✅" },
+    { label: "Wrong", value: o.wrong, icon: "❌" },
+    { label: "Overall accuracy", value: `${o.accuracy}%`, icon: "🎯" },
+    { label: "Time spent", value: fmtTime(o.timeSpentSeconds), icon: "⏱" },
+    { label: "Current streak", value: `${o.streak} days`, icon: "🔥" },
+    { label: "Best streak", value: `${o.bestStreak} days`, icon: "🏆" },
+  ];
+
+  return (
+    <div>
+      <div className="fbh-meta-row">
+        <span className="fbh-meta-badge">Progress</span>
+        <span className="fbh-meta-dot" /> <span>Section-wise performance tracking</span>
+      </div>
+
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(160px,1fr))", gap: 12, marginBottom: 22 }}>
+        {cards.map((c) => (
+          <div key={c.label} className="fbh-glass" style={{ padding: 16 }}>
+            <div style={{ fontSize: 20 }}>{c.icon}</div>
+            <div style={{ fontFamily: "var(--f-display)", fontSize: 24, fontWeight: 800, color: "var(--ink)" }}>{c.value}</div>
+            <div style={{ fontSize: 11, textTransform: "uppercase", letterSpacing: ".5px", color: "var(--ink4)", fontWeight: 700 }}>{c.label}</div>
+          </div>
+        ))}
+      </div>
+
+      {weakest.length > 0 && (
+        <div className="fbh-glass" style={{ padding: 16, marginBottom: 22 }}>
+          <div style={{ fontFamily: "var(--f-display)", fontWeight: 800, marginBottom: 8 }}>🔍 Focus areas</div>
+          <div style={{ fontSize: 13, color: "var(--ink2)" }}>
+            Your weakest sections right now: {weakest.map((s) => `${labelFor(s.type)} (${s.accuracy}%)`).join(", ")}.
+          </div>
+        </div>
+      )}
+
+      <div className="fbh-glass" style={{ padding: 18, marginBottom: 22 }}>
+        <div style={{ fontFamily: "var(--f-display)", fontWeight: 800, marginBottom: 12 }}>Section-wise accuracy</div>
+        {sections.length === 0 && <p style={{ color: "var(--ink4)", fontSize: 13 }}>Attempt a quiz to see section analytics.</p>}
+        <div style={{ display: "grid", gap: 10 }}>
+          {sections.map((s) => (
+            <div key={s.type}>
+              <div style={{ display: "flex", justifyContent: "space-between", fontSize: 12, color: "var(--ink2)", marginBottom: 4 }}>
+                <span style={{ fontWeight: 700 }}>{labelFor(s.type)}</span>
+                <span>{s.correct}/{s.attempted} · {s.accuracy}%</span>
+              </div>
+              <div role="progressbar" aria-label={`${labelFor(s.type)} accuracy`} aria-valuenow={s.accuracy} aria-valuemin={0} aria-valuemax={100} style={{ height: 8, borderRadius: 6, background: "var(--border-c)", overflow: "hidden" }}>
+                <div style={{ width: `${s.accuracy}%`, height: "100%", background: s.accuracy >= 70 ? "var(--green)" : s.accuracy >= 45 ? "var(--fbh-accent)" : "#ef4444" }} />
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <div className="fbh-glass" style={{ padding: 18 }}>
+        <div style={{ fontFamily: "var(--f-display)", fontWeight: 800, marginBottom: 12 }}>Editorial-wise history</div>
+        {data.editorials.length === 0 && <p style={{ color: "var(--ink4)", fontSize: 13 }}>No quiz attempts yet.</p>}
+        <div style={{ display: "grid", gap: 10 }}>
+          {data.editorials.map((e) => (
+            <div key={e.articleId} style={{ display: "flex", gap: 12, alignItems: "center", flexWrap: "wrap", borderBottom: "1px solid var(--border-c)", paddingBottom: 10 }}>
+              <div style={{ flex: 1, minWidth: 200 }}>
+                <div style={{ fontWeight: 700, color: "var(--ink)" }}>{e.title}</div>
+                <div style={{ fontSize: 12, color: "var(--ink4)" }}>
+                  {new Date(e.date).toLocaleDateString()} · {e.attempted}/{e.total} attempted · ✅ {e.correct} · ❌ {e.wrong} · {e.accuracy}% · ⏱ {fmtTime(e.timeSpentSeconds)}
+                </div>
+              </div>
+              <span style={{ fontSize: 11, fontWeight: 700, color: e.completed ? "var(--green)" : "var(--fbh-accent)" }}>
+                {e.completed ? "Completed" : "In progress"}
+              </span>
+              <button className="fbh-btn" onClick={async () => onOpen((await getFn({ data: { id: e.articleId } })) as any)}>Resume</button>
+            </div>
+          ))}
+        </div>
+      </div>
     </div>
   );
 }

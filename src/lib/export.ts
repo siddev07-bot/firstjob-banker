@@ -4,7 +4,7 @@ export interface VocabEntry {
   word: string; pos?: string; hindi?: string; english?: string; synonyms?: string; usage?: string;
 }
 export interface QuizQ {
-  type: "rc" | "vocab" | "cloze" | "error" | "ows";
+  type: string;
   question: string; options: string[]; answer: number; explanation?: string;
 }
 export interface EditorialAnalysis {
