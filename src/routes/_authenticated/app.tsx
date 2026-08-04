@@ -332,7 +332,13 @@ function HistoryView({ onOpen }: { onOpen: (a: ArticlePackage) => void }) {
   const getFn = useServerFn(getArticle);
   const delFn = useServerFn(deleteArticle);
   const qc = useQueryClient();
+  const listProgressFn = useServerFn(listQuizProgress);
   const list = useQuery({ queryKey: ["articles"], queryFn: () => listFn() });
+  const prog = useQuery({ queryKey: ["quiz-progress-list"], queryFn: () => listProgressFn() });
+  const progressById = useMemo(
+    () => new Map<string, any>((prog.data ?? []).map((r: any) => [r.article_id, r])),
+    [prog.data],
+  );
   const [q, setQ] = useState("");
   const [date, setDate] = useState("");
 
