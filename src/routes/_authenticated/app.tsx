@@ -830,7 +830,6 @@ function QuizView({ a }: { a: ArticlePackage }) {
     </div>
   );
 }
-}
 
 /* ────────── FLASHCARDS ────────── */
 function FlashcardView({ a }: { a: ArticlePackage }) {
