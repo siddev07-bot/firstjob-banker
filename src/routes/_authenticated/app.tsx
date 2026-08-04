@@ -997,3 +997,117 @@ function FlashcardView({ a }: { a: ArticlePackage }) {
     </div>
   );
 }
+
+/* ────────── QUIZ PROGRESS BADGE ────────── */
+function QuizBadge({ p, total }: { p?: any; total: number }) {
+  if (!p || !p.attempted) {
+    return (
+      <div style={{ marginTop: 6, fontSize: 11, fontWeight: 700, color: "var(--ink4)" }}>
+        ⬜ Quiz not started
+      </div>
+    );
+  }
+  const t = p.total || total || p.attempted;
+  const done = p.completed || (t > 0 && p.attempted >= t);
+  const acc = p.attempted ? Math.round((p.score / p.attempted) * 100) : 0;
+  return (
+    <div style={{ marginTop: 6, display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap", fontSize: 11, fontWeight: 700 }}>
+      <span style={{ padding: "2px 8px", borderRadius: 20, background: done ? "rgba(16,185,129,.12)" : "rgba(245,158,11,.12)", color: done ? "var(--green)" : "var(--fbh-accent)" }}>
+        {done ? "✅ Completed" : "🕓 In progress"}
+      </span>
+      <span style={{ color: "var(--ink4)" }}>{p.attempted}/{t} attempted · {acc}% accuracy</span>
+    </div>
+  );
+}
+
+/* ────────── PROGRESS / ANALYTICS ────────── */
+function AnalyticsView({ onOpen }: { onOpen: (a: ArticlePackage) => void }) {
+  const analyticsFn = useServerFn(getQuizAnalytics);
+  const getFn = useServerFn(getArticle);
+  const { data, isLoading } = useQuery({ queryKey: ["quiz-analytics"], queryFn: () => analyticsFn() });
+
+  if (isLoading) return <p style={{ color: "var(--ink4)" }}>Loading your progress…</p>;
+  if (!data) return null;
+
+  const o = data.overall;
+  const sections = [...data.sections].sort((a, b) => b.attempted - a.attempted);
+  const weakest = [...sections].filter((s) => s.attempted >= 3).sort((a, b) => a.accuracy - b.accuracy).slice(0, 3);
+
+  const cards = [
+    { label: "Editorials attempted", value: o.editorialsAttempted, icon: "📰" },
+    { label: "Questions solved", value: o.questionsSolved, icon: "📝" },
+    { label: "Correct", value: o.correct, icon: "✅" },
+    { label: "Wrong", value: o.wrong, icon: "❌" },
+    { label: "Overall accuracy", value: `${o.accuracy}%`, icon: "🎯" },
+    { label: "Time spent", value: fmtTime(o.timeSpentSeconds), icon: "⏱" },
+    { label: "Current streak", value: `${o.streak} days`, icon: "🔥" },
+    { label: "Best streak", value: `${o.bestStreak} days`, icon: "🏆" },
+  ];
+
+  return (
+    <div>
+      <div className="fbh-meta-row">
+        <span className="fbh-meta-badge">Progress</span>
+        <span className="fbh-meta-dot" /> <span>Section-wise performance tracking</span>
+      </div>
+
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(160px,1fr))", gap: 12, marginBottom: 22 }}>
+        {cards.map((c) => (
+          <div key={c.label} className="fbh-glass" style={{ padding: 16 }}>
+            <div style={{ fontSize: 20 }}>{c.icon}</div>
+            <div style={{ fontFamily: "var(--f-display)", fontSize: 24, fontWeight: 800, color: "var(--ink)" }}>{c.value}</div>
+            <div style={{ fontSize: 11, textTransform: "uppercase", letterSpacing: ".5px", color: "var(--ink4)", fontWeight: 700 }}>{c.label}</div>
+          </div>
+        ))}
+      </div>
+
+      {weakest.length > 0 && (
+        <div className="fbh-glass" style={{ padding: 16, marginBottom: 22 }}>
+          <div style={{ fontFamily: "var(--f-display)", fontWeight: 800, marginBottom: 8 }}>🔍 Focus areas</div>
+          <div style={{ fontSize: 13, color: "var(--ink2)" }}>
+            Your weakest sections right now: {weakest.map((s) => `${labelFor(s.type)} (${s.accuracy}%)`).join(", ")}.
+          </div>
+        </div>
+      )}
+
+      <div className="fbh-glass" style={{ padding: 18, marginBottom: 22 }}>
+        <div style={{ fontFamily: "var(--f-display)", fontWeight: 800, marginBottom: 12 }}>Section-wise accuracy</div>
+        {sections.length === 0 && <p style={{ color: "var(--ink4)", fontSize: 13 }}>Attempt a quiz to see section analytics.</p>}
+        <div style={{ display: "grid", gap: 10 }}>
+          {sections.map((s) => (
+            <div key={s.type}>
+              <div style={{ display: "flex", justifyContent: "space-between", fontSize: 12, color: "var(--ink2)", marginBottom: 4 }}>
+                <span style={{ fontWeight: 700 }}>{labelFor(s.type)}</span>
+                <span>{s.correct}/{s.attempted} · {s.accuracy}%</span>
+              </div>
+              <div role="progressbar" aria-label={`${labelFor(s.type)} accuracy`} aria-valuenow={s.accuracy} aria-valuemin={0} aria-valuemax={100} style={{ height: 8, borderRadius: 6, background: "var(--border-c)", overflow: "hidden" }}>
+                <div style={{ width: `${s.accuracy}%`, height: "100%", background: s.accuracy >= 70 ? "var(--green)" : s.accuracy >= 45 ? "var(--fbh-accent)" : "#ef4444" }} />
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <div className="fbh-glass" style={{ padding: 18 }}>
+        <div style={{ fontFamily: "var(--f-display)", fontWeight: 800, marginBottom: 12 }}>Editorial-wise history</div>
+        {data.editorials.length === 0 && <p style={{ color: "var(--ink4)", fontSize: 13 }}>No quiz attempts yet.</p>}
+        <div style={{ display: "grid", gap: 10 }}>
+          {data.editorials.map((e) => (
+            <div key={e.articleId} style={{ display: "flex", gap: 12, alignItems: "center", flexWrap: "wrap", borderBottom: "1px solid var(--border-c)", paddingBottom: 10 }}>
+              <div style={{ flex: 1, minWidth: 200 }}>
+                <div style={{ fontWeight: 700, color: "var(--ink)" }}>{e.title}</div>
+                <div style={{ fontSize: 12, color: "var(--ink4)" }}>
+                  {new Date(e.date).toLocaleDateString()} · {e.attempted}/{e.total} attempted · ✅ {e.correct} · ❌ {e.wrong} · {e.accuracy}% · ⏱ {fmtTime(e.timeSpentSeconds)}
+                </div>
+              </div>
+              <span style={{ fontSize: 11, fontWeight: 700, color: e.completed ? "var(--green)" : "var(--fbh-accent)" }}>
+                {e.completed ? "Completed" : "In progress"}
+              </span>
+              <button className="fbh-btn" onClick={async () => onOpen((await getFn({ data: { id: e.articleId } })) as any)}>Resume</button>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
