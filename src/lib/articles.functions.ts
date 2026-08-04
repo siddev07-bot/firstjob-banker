@@ -1,6 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { z } from "zod";
+import { QUIZ_TYPES } from "@/lib/quiz-types";
 
 const VocabEntry = z.object({
   word: z.string(),
