@@ -15,7 +15,7 @@ export const Route = createFileRoute("/_authenticated/app")({
   component: AppPage,
 });
 
-type Tab = "dashboard" | "generate" | "history" | "editorial" | "vocab" | "quiz" | "flashcards";
+type Tab = "dashboard" | "generate" | "history" | "editorial" | "vocab" | "quiz" | "flashcards" | "analytics";
 
 function ReadingModeToggle() {
   const { mode, setMode } = useReadingMode();
