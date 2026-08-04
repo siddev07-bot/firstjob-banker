@@ -6,7 +6,8 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useReadingMode } from "@/hooks/use-reading-mode";
 import { generateEditorialPackage } from "@/lib/ai.functions";
-import { saveArticle, listArticles, getArticle, deleteArticle, getDashboardStats, saveQuizStats } from "@/lib/articles.functions";
+import { saveArticle, listArticles, getArticle, deleteArticle, getDashboardStats, getQuizProgress, saveQuizProgress, resetQuizProgress, listQuizProgress, getQuizAnalytics } from "@/lib/articles.functions";
+import { labelFor } from "@/lib/quiz-types";
 import { exportArticlePDF, exportVocabPDF, exportNotesPDF, printArticle, type ArticlePackage } from "@/lib/export";
 import { LineChart, Line, XAxis, YAxis, ResponsiveContainer, Tooltip, CartesianGrid } from "recharts";
 
