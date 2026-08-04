@@ -47,7 +47,7 @@ QUIZ DISTRIBUTION — mandatory, generate EXACTLY these counts (60 questions tot
 - "vocab" (Vocabulary — meaning/synonym/antonym): 5
 - "tone" (Editorial Tone / attitude of the author): 2
 - "rc" (Reading Comprehension inference from the editorial): 3
-Every question must have exactly 4 options, a 0-based "answer" index, and a short explanation.
+Every question must have exactly 4 options, a 0-based "answer" index, and a short explanation.`;
 
 export const generateEditorialPackage = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
