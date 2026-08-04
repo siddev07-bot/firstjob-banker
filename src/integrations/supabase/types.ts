@@ -71,6 +71,62 @@ export type Database = {
         }
         Relationships: []
       }
+      quiz_attempts: {
+        Row: {
+          answers: Json
+          article_id: string
+          attempted: number
+          completed: boolean
+          created_at: string
+          id: string
+          last_attempted_at: string
+          score: number
+          started_at: string
+          time_spent_seconds: number
+          total: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          answers?: Json
+          article_id: string
+          attempted?: number
+          completed?: boolean
+          created_at?: string
+          id?: string
+          last_attempted_at?: string
+          score?: number
+          started_at?: string
+          time_spent_seconds?: number
+          total?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          answers?: Json
+          article_id?: string
+          attempted?: number
+          completed?: boolean
+          created_at?: string
+          id?: string
+          last_attempted_at?: string
+          score?: number
+          started_at?: string
+          time_spent_seconds?: number
+          total?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "quiz_attempts_article_id_fkey"
+            columns: ["article_id"]
+            isOneToOne: false
+            referencedRelation: "articles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       reading_log: {
         Row: {
           article_id: string | null
