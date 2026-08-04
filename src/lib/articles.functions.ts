@@ -295,7 +295,7 @@ export const listQuizProgress = createServerFn({ method: "GET" })
   .handler(async ({ context }) => {
     const { data, error } = await context.supabase
       .from("quiz_attempts")
-      .select("article_id,score,attempted,total,completed,accuracy:score,time_spent_seconds,last_attempted_at")
+      .select("article_id,score,attempted,total,completed,time_spent_seconds,last_attempted_at")
       .order("last_attempted_at", { ascending: false });
     if (error) logAndThrow("load quiz progress", error);
     return data ?? [];
