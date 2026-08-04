@@ -31,9 +31,23 @@ Return ONLY valid JSON matching this exact schema (no markdown, no commentary):
     { "word": "string", "note": "string - SBI PO exam-focused tip about this word" }
   ], // 5-8 entries
   "quiz": [
-    { "type": "rc|vocab|cloze|error|ows", "question": "string", "options": ["A","B","C","D"], "answer": 0, "explanation": "string" }
-  ] // 12-15 questions, mix of all 5 types
-}`;
+    { "type": "error|cloze|para_jumble|phrase_replacement|double_fillers|sentence_rearrangement|word_rearrangement|ows|vocab|tone|rc", "question": "string", "options": ["A","B","C","D"], "answer": 0, "explanation": "string" }
+  ]
+}
+
+QUIZ DISTRIBUTION — mandatory, generate EXACTLY these counts (60 questions total), all grounded in the editorial:
+- "error" (Error Detection / spotting the grammatical error): 10
+- "cloze" (Cloze Test blanks from the editorial): 10
+- "para_jumble" (Para Jumbles — order the sentences): 5
+- "phrase_replacement" (Phrase Replacement / sentence improvement): 5
+- "double_fillers" (Double Fillers — two blanks, one option pair): 5
+- "sentence_rearrangement" (Sentence Rearrangement): 5
+- "word_rearrangement" (Word Rearrangement within a sentence): 5
+- "ows" (One Word Substitution): 5
+- "vocab" (Vocabulary — meaning/synonym/antonym): 5
+- "tone" (Editorial Tone / attitude of the author): 2
+- "rc" (Reading Comprehension inference from the editorial): 3
+Every question must have exactly 4 options, a 0-based "answer" index, and a short explanation.
 
 export const generateEditorialPackage = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
