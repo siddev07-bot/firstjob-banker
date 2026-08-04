@@ -92,6 +92,7 @@ function AppPage() {
           <button role="tab" aria-selected={tab === "vocab"} className={`fbh-tab text-lg ${tab === "vocab" ? "active" : ""}`} onClick={() => setTab("vocab")} disabled={!current}>📚 Vocabulary</button>
           <button role="tab" aria-selected={tab === "quiz"} className={`fbh-tab text-lg ${tab === "quiz" ? "active" : ""}`} onClick={() => setTab("quiz")} disabled={!current}>📝 Quiz</button>
           <button role="tab" aria-selected={tab === "flashcards"} className={`fbh-tab text-lg ${tab === "flashcards" ? "active" : ""}`} onClick={() => setTab("flashcards")} disabled={!current}>🎴 Flashcards</button>
+          <button role="tab" aria-selected={tab === "analytics"} className={`fbh-tab text-lg ${tab === "analytics" ? "active" : ""}`} onClick={() => setTab("analytics")}>📈 Progress</button>
         </nav>
 
         {tab === "dashboard" && <DashboardView onOpen={openArticle} onGenerate={() => setTab("generate")} />}
@@ -101,6 +102,7 @@ function AppPage() {
         {tab === "vocab" && current && <VocabView a={current} />}
         {tab === "quiz" && current && <QuizView a={current} />}
         {tab === "flashcards" && current && <FlashcardView a={current} />}
+        {tab === "analytics" && <AnalyticsView onOpen={openArticle} />}
       </main>
     </div>
   );
