@@ -384,6 +384,7 @@ function HistoryView({ onOpen }: { onOpen: (a: ArticlePackage) => void }) {
               <div style={{ fontSize: 12, color: "var(--ink4)", marginTop: 2 }}>
                 {new Date(a.created_at).toLocaleString()} · {(a.vocabulary as any[])?.length ?? 0} words · {(a.quiz as any[])?.length ?? 0} questions
               </div>
+              <QuizBadge p={progressById.get(a.id)} total={(a.quiz as any[])?.length ?? 0} />
             </div>
             <button className="fbh-btn" aria-label={`Open article: ${a.title}`} onClick={async () => onOpen((await getFn({ data: { id: a.id } })) as any)}>Open</button>
             <button className="fbh-btn" aria-label={`Delete article: ${a.title}`} onClick={() => remove(a.id)} style={{ color: "var(--fbh-accent)" }}>🗑</button>
