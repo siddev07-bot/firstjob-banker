@@ -94,16 +94,31 @@ export const generateEditorialPackage = createServerFn({ method: "POST" })
       throw new Error("AI returned malformed JSON.");
     }
 
-    // Hard cap: keep at most the required count per section, 15 questions total.
-    if (Array.isArray(parsed?.quiz)) {
-      const seen: Record<string, number> = {};
-      parsed.quiz = parsed.quiz.filter((q: any) => {
-        const t = String(q?.type ?? "");
-        const max = (QUIZ_DISTRIBUTION as Record<string, number>)[t] ?? 0;
-        if (max === 0) return false;
-        seen[t] = (seen[t] ?? 0) + 1;
-        return seen[t] <= max;
-      }).slice(0, QUIZ_TOTAL);
+    // Strict validation — hard-fail if the AI output does not match the exact structure.
+    const result = PackageSchema.safeParse(parsed);
+    if (!result.success) {
+      console.error(
+        "[ai.generateEditorialPackage] schema validation failed",
+        JSON.stringify(result.error.issues.slice(0, 20)),
+      );
+      throw new Error(
+        "AI output did not match the required structure (15 questions: 6 RC, 3 Cloze, 3 Error Detection, 2 Fillers, 1 Para Jumble). Please try generating again.",
+      );
     }
-    return parsed;
+
+    // Distribution check — exact counts per section, 15 total.
+    const counts: Record<string, number> = {};
+    for (const q of result.data.quiz) counts[q.type] = (counts[q.type] ?? 0) + 1;
+    const mismatches = REQUIRED_SECTIONS.filter(([type, n]) => (counts[type] ?? 0) !== n).map(
+      ([type, n]) => `${type}: expected ${n}, got ${counts[type] ?? 0}`,
+    );
+    if (mismatches.length || result.data.quiz.length !== QUIZ_TOTAL) {
+      console.error("[ai.generateEditorialPackage] distribution mismatch", mismatches, result.data.quiz.length);
+      throw new Error(
+        `AI output had the wrong question distribution (${mismatches.join("; ") || `total ${result.data.quiz.length}/${QUIZ_TOTAL}`}). Please try generating again.`,
+      );
+    }
+
+    return result.data;
   });
+
