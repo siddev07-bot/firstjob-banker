@@ -92,5 +92,17 @@ export const generateEditorialPackage = createServerFn({ method: "POST" })
     } catch {
       throw new Error("AI returned malformed JSON.");
     }
+
+    // Hard cap: keep at most the required count per section, 15 questions total.
+    if (Array.isArray(parsed?.quiz)) {
+      const seen: Record<string, number> = {};
+      parsed.quiz = parsed.quiz.filter((q: any) => {
+        const t = String(q?.type ?? "");
+        const max = (QUIZ_DISTRIBUTION as Record<string, number>)[t] ?? 0;
+        if (max === 0) return false;
+        seen[t] = (seen[t] ?? 0) + 1;
+        return seen[t] <= max;
+      }).slice(0, QUIZ_TOTAL);
+    }
     return parsed;
   });
