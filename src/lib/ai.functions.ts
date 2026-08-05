@@ -1,6 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { z } from "zod";
+import { QUIZ_DISTRIBUTION, QUIZ_TOTAL } from "@/lib/quiz-types";
 
 const InputSchema = z.object({ article: z.string().min(50).max(20000) });
 
