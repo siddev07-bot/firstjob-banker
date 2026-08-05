@@ -29,19 +29,19 @@ export const QUIZ_TYPE_LABEL: Record<QuizType, string> = {
   rc: "Reading Comprehension",
 };
 
-/** Required number of questions per section in every generated editorial. */
+/** Required number of questions per section in every generated editorial (15 total, Prelims level). */
 export const QUIZ_DISTRIBUTION: Record<QuizType, number> = {
-  error: 10,
-  cloze: 10,
-  para_jumble: 5,
-  phrase_replacement: 5,
-  double_fillers: 5,
-  sentence_rearrangement: 5,
-  word_rearrangement: 5,
-  ows: 5,
-  vocab: 5,
-  tone: 2,
-  rc: 3,
+  rc: 6,
+  cloze: 3,
+  error: 3,
+  double_fillers: 2,
+  para_jumble: 1,
+  phrase_replacement: 0,
+  sentence_rearrangement: 0,
+  word_rearrangement: 0,
+  ows: 0,
+  vocab: 0,
+  tone: 0,
 };
 
 export const QUIZ_TOTAL = Object.values(QUIZ_DISTRIBUTION).reduce((a, b) => a + b, 0);
