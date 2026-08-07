@@ -91,7 +91,7 @@ export const generateEditorialPackage = createServerFn({ method: "POST" })
       throw new Error("AI returned malformed JSON.");
     }
 
-    // Strict validation — hard-fail if the AI output does not match the exact structure.
+    // Validation — RC set must be well-formed (8-10 tagged questions, 4 options each).
     const result = PackageSchema.safeParse(parsed);
     if (!result.success) {
       console.error(
@@ -99,22 +99,11 @@ export const generateEditorialPackage = createServerFn({ method: "POST" })
         JSON.stringify(result.error.issues.slice(0, 20)),
       );
       throw new Error(
-        "AI output did not match the required structure (15 questions: 6 RC, 3 Cloze, 3 Error Detection, 2 Fillers, 1 Para Jumble). Please try generating again.",
+        "AI output did not match the required Reading Comprehension structure (8-10 tagged questions, 4 options each). Please try generating again.",
       );
     }
 
-    // Distribution check — exact counts per section, 15 total.
-    const counts: Record<string, number> = {};
-    for (const q of result.data.quiz) counts[q.type] = (counts[q.type] ?? 0) + 1;
-    const mismatches = REQUIRED_SECTIONS.filter(([type, n]) => (counts[type] ?? 0) !== n).map(
-      ([type, n]) => `${type}: expected ${n}, got ${counts[type] ?? 0}`,
-    );
-    if (mismatches.length || result.data.quiz.length !== QUIZ_TOTAL) {
-      console.error("[ai.generateEditorialPackage] distribution mismatch", mismatches, result.data.quiz.length);
-      throw new Error(
-        `AI output had the wrong question distribution (${mismatches.join("; ") || `total ${result.data.quiz.length}/${QUIZ_TOTAL}`}). Please try generating again.`,
-      );
-    }
+
 
     return result.data;
   });
