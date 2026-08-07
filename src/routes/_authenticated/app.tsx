@@ -51,7 +51,7 @@ function AppPage() {
     await qc.cancelQueries();
     qc.clear();
     await supabase.auth.signOut();
-    nav({ to: "/auth", replace: true });
+    nav({ to: "/auth", search: { next: undefined }, replace: true });
   };
 
   const openArticle = (a: ArticlePackage) => {
