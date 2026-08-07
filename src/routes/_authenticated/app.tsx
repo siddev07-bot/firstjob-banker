@@ -559,9 +559,11 @@ function VocabView({ a }: { a: ArticlePackage }) {
       <div className="fbh-section-title">📚 Vocabulary List</div>
       <div className="fbh-table-wrap">
         <table className="fbh-vocab-table">
-          <thead><tr><th>#</th><th>Word</th><th>POS</th><th>Hindi</th><th>English</th><th>Synonyms</th></tr></thead>
+          <thead><tr><th>#</th><th>Word</th><th>POS</th><th>Hindi</th><th>English</th><th>Synonyms</th><th>Antonyms</th><th>Trick / Trap</th></tr></thead>
           <tbody>
-            {a.vocabulary?.map((v, i) => (
+            {a.vocabulary?.map((v, i) => {
+              const x = v as typeof v & { antonyms?: string; memory_trick?: string; ibps_trap?: string };
+              return (
               <tr key={i}>
                 <td style={{ color: "var(--ink4)", fontFamily: "var(--f-mono)" }}>{i + 1}</td>
                 <td className="fbh-vt-word">{v.word}</td>
@@ -569,8 +571,14 @@ function VocabView({ a }: { a: ArticlePackage }) {
                 <td style={{ color: "var(--ink2)", fontWeight: 600 }}>{v.hindi}</td>
                 <td style={{ color: "var(--ink3)" }}>{v.english}</td>
                 <td style={{ fontSize: 12, color: "var(--ink4)", fontStyle: "italic" }}>{v.synonyms}</td>
+                <td style={{ fontSize: 12, color: "var(--ink4)", fontStyle: "italic" }}>{x.antonyms}</td>
+                <td style={{ fontSize: 12, color: "var(--ink4)" }}>
+                  {x.memory_trick && <div>🧠 {x.memory_trick}</div>}
+                  {x.ibps_trap && <div>⚠️ {x.ibps_trap}</div>}
+                </td>
               </tr>
-            ))}
+              );
+            })}
           </tbody>
         </table>
       </div>
