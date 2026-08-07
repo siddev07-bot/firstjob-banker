@@ -9,7 +9,11 @@ const VocabEntry = z.object({
   hindi: z.string().optional().default(""),
   english: z.string().optional().default(""),
   synonyms: z.union([z.string(), z.array(z.string())]).optional().default("").transform((v) => (Array.isArray(v) ? v.join(", ") : v)),
+  antonyms: z.union([z.string(), z.array(z.string())]).optional().default("").transform((v) => (Array.isArray(v) ? v.join(", ") : v)),
   usage: z.string().optional().default(""),
+  editorial_sentence: z.string().optional().default(""),
+  memory_trick: z.string().optional().default(""),
+  ibps_trap: z.string().optional().default(""),
 });
 const SbiNote = z.object({ word: z.string(), note: z.string().optional().default("") });
 const QuizQ = z.object({
@@ -19,6 +23,8 @@ const QuizQ = z.object({
   options: z.array(z.string()).min(2),
   answer: z.coerce.number().int().min(0).catch(0).default(0),
   explanation: z.string().optional().default(""),
+  para_ref: z.string().optional().default(""),
+  difficulty: z.string().optional().default(""),
 });
 
 /** AI output is best-effort: drop malformed entries instead of failing the whole save. */
