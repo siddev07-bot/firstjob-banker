@@ -1,13 +1,12 @@
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { z } from "zod";
-import { QUIZ_TOTAL } from "@/lib/quiz-types";
-import { PackageSchema, REQUIRED_SECTIONS } from "@/lib/ai-schema";
+import { PackageSchema, RC_SUBTYPES } from "@/lib/ai-schema";
 
 
 const InputSchema = z.object({ article: z.string().min(50).max(20000) });
 
-const SYSTEM_PROMPT = `You are an expert SBI PO English coach. You analyze newspaper editorials and produce exam-ready study material.
+const SYSTEM_PROMPT = `You are an expert IBPS PO / SBI PO English question setter. You analyze newspaper editorials (The Hindu, Indian Express, LiveMint, etc.) and produce exam-ready study material.
 
 Return ONLY valid JSON matching this exact schema (no markdown, no commentary):
 
@@ -34,25 +33,21 @@ Return ONLY valid JSON matching this exact schema (no markdown, no commentary):
     { "word": "string", "note": "string - SBI PO exam-focused tip about this word" }
   ], // 5-8 entries
   "quiz": [
-    { "type": "rc|cloze|error|double_fillers|para_jumble", "question": "string", "options": ["A","B","C","D"], "answer": 0, "explanation": "string - one line" }
+    { "type": "rc", "subtype": "Inference", "question": "string", "options": ["A","B","C","D"], "answer": 0, "explanation": "" }
   ]
 }
 
-QUIZ RULES — IBPS PO / SBI PO PRELIMS level, moderate difficulty:
-Generate EXACTLY 15 questions in total. NEVER generate more than 15, regardless of editorial length. Do not produce a large question bank.
+READING COMPREHENSION QUESTION RULES — exactly the style and difficulty of recent IBPS PO / SBI PO Prelims:
+- Generate 8 to 10 Reading Comprehension questions, all with "type": "rc" and exactly 4 options each.
+- Tag every question with "subtype", one of: ${RC_SUBTYPES.join(", ")}.
+- Maintain a balanced mix of subtypes. Do NOT force a subtype that does not naturally fit the passage — prioritise exam realism over completeness. Avoid repeating the same subtype unnecessarily.
+- No trivial copy-paste questions. Inference questions must require real logical reasoning, not restatement.
+- Vocabulary / Synonym-Antonym questions must use difficult editorial words AS USED in the passage.
+- Distractors must be realistic and confusing, like actual banking exams.
+- Vary the correct answer position across the set — do not cluster on any single index.
+- Leave "explanation" as an empty string.
+- Every question must be derived FROM the editorial text provided — never invent unrelated content.`;
 
-Exact distribution (15 total):
-- "rc" (Reading Comprehension, from the editorial): 6
-  · 1 main idea / gist question
-  · 2 inference-based questions (implied, not directly stated)
-  · 1 specific detail / fact recall question
-  · 2 contextual vocabulary questions (synonym/antonym of a word AS USED in this passage)
-- "cloze": 3 — pick ONE 4-6 sentence chunk from the editorial, remove 3 words and replace them with numbered blanks (1), (2), (3). Each of the 3 questions covers one blank and repeats the chunk with the blanks shown. Distractors must be grammatically or contextually close but wrong.
-- "error" (Error Detection): 3 — take 3 sentences from the editorial (or lightly reworded), split each into parts (A)(B)(C)(D) shown in the question text; options are the four parts, and at least ONE of the 3 questions must use "No error" as the correct option. Errors: subject-verb agreement, tense, preposition, article, or parallelism.
-- "double_fillers" (Fillers): 2 — take 2 sentences from the editorial, blank out 1-2 key words each; 4 options testing grammar/contextual fit.
-- "para_jumble": 1 — pick 5 consecutive sentences from the editorial, present them jumbled as labelled sentences, and ask for the correct sequence with 4 different ordering options.
-
-Every question must be derived FROM the editorial text provided — never invent unrelated content. Each question must have exactly 4 options, a 0-based "answer" index, and a brief one-line explanation.`;
 
 export const generateEditorialPackage = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
