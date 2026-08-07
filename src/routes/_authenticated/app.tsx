@@ -647,8 +647,24 @@ function AnalysisSection({ analysis }: { analysis?: ArticlePackage["analysis"] }
             <p>{one_line_summary}</p>
           </div>
         )}
+        {(best_title || (inferences?.length ?? 0) > 0 || (facts?.length ?? 0) > 0) && (
+          <>
+            <div className="fbh-section-title">⚡ Quick Revision</div>
+            <div style={{ display: "grid", gap: 12, gridTemplateColumns: "repeat(auto-fit,minmax(240px,1fr))" }}>
+              {best_title && (
+                <div className="fbh-glass" style={{ padding: 16 }}>
+                  <div className="fbh-info-label" style={{ marginBottom: 6 }}>🏷️ Best Title</div>
+                  <p style={{ margin: 0, fontSize: 14, lineHeight: 1.6 }}>{best_title}</p>
+                </div>
+              )}
+              {(inferences?.length ?? 0) > 0 && <List title="Important Inferences" items={inferences} emoji="🧠" />}
+              {(facts?.length ?? 0) > 0 && <List title="Important Facts" items={facts} emoji="📌" />}
+            </div>
+          </>
+        )}
       </div>
     </>
+
   );
 }
 
