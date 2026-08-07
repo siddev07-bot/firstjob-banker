@@ -14,6 +14,7 @@ const VocabEntry = z.object({
 const SbiNote = z.object({ word: z.string(), note: z.string().optional().default("") });
 const QuizQ = z.object({
   type: z.enum(QUIZ_TYPES).catch("vocab").default("vocab"),
+  subtype: z.string().optional().default(""),
   question: z.string(),
   options: z.array(z.string()).min(2),
   answer: z.coerce.number().int().min(0).catch(0).default(0),
