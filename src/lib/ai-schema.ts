@@ -23,7 +23,7 @@ export const REQUIRED_SECTIONS = {
   para_jumble: 5,
 } as const;
 
-export const QUIZ_SECTION_TYPES = Object.keys(REQUIRED_SECTIONS) as (keyof typeof REQUIRED_SECTIONS)[];
+export const QUIZ_SECTION_TYPES = ["rc", "error", "cloze", "word_rearrangement", "para_jumble"] as const;
 
 export const DIFFICULTIES = ["Easy", "Moderate", "Difficult"] as const;
 
