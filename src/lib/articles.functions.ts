@@ -48,12 +48,17 @@ const Analysis = z.object({
   author_tone: z.string().catch("").default(""),
   main_idea: z.string().catch("").default(""),
   one_line_summary: z.string().catch("").default(""),
+  best_title: z.string().catch("").default(""),
+  inferences: StringList,
+  facts: StringList,
 }).catch({
   issue: "", causes: [], effects: [], solutions: [],
   author_tone: "", main_idea: "", one_line_summary: "",
+  best_title: "", inferences: [], facts: [],
 }).default({
   issue: "", causes: [], effects: [], solutions: [],
   author_tone: "", main_idea: "", one_line_summary: "",
+  best_title: "", inferences: [], facts: [],
 });
 
 const SavePayload = z.object({
