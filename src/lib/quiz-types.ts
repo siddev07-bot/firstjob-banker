@@ -17,28 +17,28 @@ export type QuizType = (typeof QUIZ_TYPES)[number];
 
 export const QUIZ_TYPE_LABEL: Record<QuizType, string> = {
   error: "Error Detection",
-  cloze: "Cloze Test",
-  para_jumble: "Para Jumbles",
+  cloze: "Single Fillers",
+  para_jumble: "Para Jumble",
   phrase_replacement: "Phrase Replacement",
   double_fillers: "Double Fillers",
   sentence_rearrangement: "Sentence Rearrangement",
-  word_rearrangement: "Word Rearrangement",
+  word_rearrangement: "Word Swap",
   ows: "One Word Substitution",
   vocab: "Vocabulary",
   tone: "Editorial Tone",
   rc: "Reading Comprehension",
 };
 
-/** Required number of questions per section in every generated editorial (15 total, Prelims level). */
+/** Required number of questions per section in every generated editorial (30 total, IBPS PO Prelims level). */
 export const QUIZ_DISTRIBUTION: Record<QuizType, number> = {
-  rc: 6,
-  cloze: 3,
-  error: 3,
-  double_fillers: 2,
-  para_jumble: 1,
+  rc: 10,
+  error: 5,
+  cloze: 5,
+  word_rearrangement: 5,
+  para_jumble: 5,
+  double_fillers: 0,
   phrase_replacement: 0,
   sentence_rearrangement: 0,
-  word_rearrangement: 0,
   ows: 0,
   vocab: 0,
   tone: 0,

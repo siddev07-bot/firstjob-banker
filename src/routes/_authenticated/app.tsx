@@ -559,9 +559,11 @@ function VocabView({ a }: { a: ArticlePackage }) {
       <div className="fbh-section-title">📚 Vocabulary List</div>
       <div className="fbh-table-wrap">
         <table className="fbh-vocab-table">
-          <thead><tr><th>#</th><th>Word</th><th>POS</th><th>Hindi</th><th>English</th><th>Synonyms</th></tr></thead>
+          <thead><tr><th>#</th><th>Word</th><th>POS</th><th>Hindi</th><th>English</th><th>Synonyms</th><th>Antonyms</th><th>Trick / Trap</th></tr></thead>
           <tbody>
-            {a.vocabulary?.map((v, i) => (
+            {a.vocabulary?.map((v, i) => {
+              const x = v as typeof v & { antonyms?: string; memory_trick?: string; ibps_trap?: string };
+              return (
               <tr key={i}>
                 <td style={{ color: "var(--ink4)", fontFamily: "var(--f-mono)" }}>{i + 1}</td>
                 <td className="fbh-vt-word">{v.word}</td>
@@ -569,8 +571,14 @@ function VocabView({ a }: { a: ArticlePackage }) {
                 <td style={{ color: "var(--ink2)", fontWeight: 600 }}>{v.hindi}</td>
                 <td style={{ color: "var(--ink3)" }}>{v.english}</td>
                 <td style={{ fontSize: 12, color: "var(--ink4)", fontStyle: "italic" }}>{v.synonyms}</td>
+                <td style={{ fontSize: 12, color: "var(--ink4)", fontStyle: "italic" }}>{x.antonyms}</td>
+                <td style={{ fontSize: 12, color: "var(--ink4)" }}>
+                  {x.memory_trick && <div>🧠 {x.memory_trick}</div>}
+                  {x.ibps_trap && <div>⚠️ {x.ibps_trap}</div>}
+                </td>
               </tr>
-            ))}
+              );
+            })}
           </tbody>
         </table>
       </div>
@@ -600,6 +608,7 @@ function VocabView({ a }: { a: ArticlePackage }) {
 function AnalysisSection({ analysis }: { analysis?: ArticlePackage["analysis"] }) {
   if (!analysis) return null;
   const { issue, causes, effects, solutions, author_tone, main_idea, one_line_summary } = analysis;
+  const { best_title, inferences, facts } = analysis as { best_title?: string; inferences?: string[]; facts?: string[] };
   const hasAny = issue || main_idea || one_line_summary || author_tone ||
     (causes?.length ?? 0) + (effects?.length ?? 0) + (solutions?.length ?? 0) > 0;
   if (!hasAny) return null;
@@ -646,8 +655,24 @@ function AnalysisSection({ analysis }: { analysis?: ArticlePackage["analysis"] }
             <p>{one_line_summary}</p>
           </div>
         )}
+        {(best_title || (inferences?.length ?? 0) > 0 || (facts?.length ?? 0) > 0) && (
+          <>
+            <div className="fbh-section-title">⚡ Quick Revision</div>
+            <div style={{ display: "grid", gap: 12, gridTemplateColumns: "repeat(auto-fit,minmax(240px,1fr))" }}>
+              {best_title && (
+                <div className="fbh-glass" style={{ padding: 16 }}>
+                  <div className="fbh-info-label" style={{ marginBottom: 6 }}>🏷️ Best Title</div>
+                  <p style={{ margin: 0, fontSize: 14, lineHeight: 1.6 }}>{best_title}</p>
+                </div>
+              )}
+              {(inferences?.length ?? 0) > 0 && <List title="Important Inferences" items={inferences} emoji="🧠" />}
+              {(facts?.length ?? 0) > 0 && <List title="Important Facts" items={facts} emoji="📌" />}
+            </div>
+          </>
+        )}
       </div>
     </>
+
   );
 }
 
@@ -809,7 +834,8 @@ function QuizView({ a }: { a: ArticlePackage }) {
 
       <div className="fbh-glass" style={{ padding: 22 }}>
         <div style={{ display: "inline-flex", alignItems: "center", gap: 6, fontSize: 11, fontWeight: 800, textTransform: "uppercase", letterSpacing: ".5px", color: "var(--fbh-accent)", background: "rgba(245,158,11,.08)", padding: "4px 10px", borderRadius: 20, marginBottom: 12 }}>
-          {(q as { subtype?: string }).subtype || labelFor(q!.type)} · Q{idx + 1}
+          {labelFor(q!.type)}{(q as { subtype?: string }).subtype ? ` · ${(q as { subtype?: string }).subtype}` : ""}
+          {(q as { difficulty?: string }).difficulty ? ` · ${(q as { difficulty?: string }).difficulty}` : ""} · Q{idx + 1}
         </div>
         <div style={{ fontFamily: "var(--f-display)", fontSize: 17, fontWeight: 600, color: "var(--ink)", lineHeight: 1.6, marginBottom: 16 }}>{q!.question}</div>
         <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
@@ -827,6 +853,9 @@ function QuizView({ a }: { a: ArticlePackage }) {
           <div role="status" style={{ marginTop: 14, padding: "14px 16px", background: "var(--blue-bg)", border: "1px solid #bfdbfe", borderRadius: 10, fontSize: 13, color: "var(--ink2)" }}>
             <div style={{ fontSize: 11, fontWeight: 800, textTransform: "uppercase", letterSpacing: ".6px", color: "var(--blue2)", marginBottom: 4 }}>💡 Explanation</div>
             {q!.explanation}
+            {(q as { para_ref?: string }).para_ref && (
+              <div style={{ marginTop: 6, fontSize: 12, color: "var(--ink4)" }}>📖 {(q as { para_ref?: string }).para_ref}</div>
+            )}
           </div>
         )}
         <div style={{ display: "flex", justifyContent: "space-between", marginTop: 18, gap: 8, flexWrap: "wrap" }}>
