@@ -809,7 +809,7 @@ function QuizView({ a }: { a: ArticlePackage }) {
 
       <div className="fbh-glass" style={{ padding: 22 }}>
         <div style={{ display: "inline-flex", alignItems: "center", gap: 6, fontSize: 11, fontWeight: 800, textTransform: "uppercase", letterSpacing: ".5px", color: "var(--fbh-accent)", background: "rgba(245,158,11,.08)", padding: "4px 10px", borderRadius: 20, marginBottom: 12 }}>
-          {labelFor(q!.type)} · Q{idx + 1}
+          {(q as { subtype?: string }).subtype || labelFor(q!.type)} · Q{idx + 1}
         </div>
         <div style={{ fontFamily: "var(--f-display)", fontSize: 17, fontWeight: 600, color: "var(--ink)", lineHeight: 1.6, marginBottom: 16 }}>{q!.question}</div>
         <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
