@@ -853,6 +853,9 @@ function QuizView({ a }: { a: ArticlePackage }) {
           <div role="status" style={{ marginTop: 14, padding: "14px 16px", background: "var(--blue-bg)", border: "1px solid #bfdbfe", borderRadius: 10, fontSize: 13, color: "var(--ink2)" }}>
             <div style={{ fontSize: 11, fontWeight: 800, textTransform: "uppercase", letterSpacing: ".6px", color: "var(--blue2)", marginBottom: 4 }}>💡 Explanation</div>
             {q!.explanation}
+            {(q as { para_ref?: string }).para_ref && (
+              <div style={{ marginTop: 6, fontSize: 12, color: "var(--ink4)" }}>📖 {(q as { para_ref?: string }).para_ref}</div>
+            )}
           </div>
         )}
         <div style={{ display: "flex", justifyContent: "space-between", marginTop: 18, gap: 8, flexWrap: "wrap" }}>
