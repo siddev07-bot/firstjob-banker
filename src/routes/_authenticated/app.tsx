@@ -600,6 +600,7 @@ function VocabView({ a }: { a: ArticlePackage }) {
 function AnalysisSection({ analysis }: { analysis?: ArticlePackage["analysis"] }) {
   if (!analysis) return null;
   const { issue, causes, effects, solutions, author_tone, main_idea, one_line_summary } = analysis;
+  const { best_title, inferences, facts } = analysis as { best_title?: string; inferences?: string[]; facts?: string[] };
   const hasAny = issue || main_idea || one_line_summary || author_tone ||
     (causes?.length ?? 0) + (effects?.length ?? 0) + (solutions?.length ?? 0) > 0;
   if (!hasAny) return null;
