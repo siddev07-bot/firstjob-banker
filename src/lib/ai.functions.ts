@@ -66,7 +66,67 @@ D — "para_jumble" (5): Take 5 key ideas from the editorial as sentences labell
 
 Every question needs exactly 4 options and an "answer" index 0-3. Vary the correct-answer position.`;
 
-async function callGateway(apiKey: string, system: string, user: string, maxTokens: number) {
+/** Best-effort repair of truncated/fenced JSON coming back from the model. */
+function parseLoose(raw: string): unknown {
+  let s = raw.trim();
+  // strip markdown fences
+  s = s.replace(/^```(?:json)?/i, "").replace(/```$/, "").trim();
+  const start = s.indexOf("{");
+  if (start > 0) s = s.slice(start);
+  try {
+    return JSON.parse(s);
+  } catch { /* try repair */ }
+
+  // Drop a trailing incomplete token, then close open strings/brackets.
+  let depthStack: string[] = [];
+  let inStr = false;
+  let esc = false;
+  let lastSafe = -1; // index after last complete top-level-ish value
+  for (let i = 0; i < s.length; i++) {
+    const c = s[i]!;
+    if (inStr) {
+      if (esc) esc = false;
+      else if (c === "\\") esc = true;
+      else if (c === '"') inStr = false;
+      continue;
+    }
+    if (c === '"') inStr = true;
+    else if (c === "{" || c === "[") depthStack.push(c === "{" ? "}" : "]");
+    else if (c === "}" || c === "]") { depthStack.pop(); lastSafe = i; }
+    else if (c === ",") lastSafe = i;
+  }
+
+  const candidates: string[] = [];
+  const closeAll = (str: string) => {
+    // recompute open brackets for this truncated slice
+    const stack: string[] = [];
+    let q = false, e = false;
+    for (const c of str) {
+      if (q) { if (e) e = false; else if (c === "\\") e = true; else if (c === '"') q = false; continue; }
+      if (c === '"') q = true;
+      else if (c === "{") stack.push("}");
+      else if (c === "[") stack.push("]");
+      else if (c === "}" || c === "]") stack.pop();
+    }
+    let out = str;
+    if (q) out += '"';
+    out = out.replace(/,\s*$/, "");
+    while (stack.length) out += stack.pop();
+    return out;
+  };
+
+  candidates.push(closeAll(s));
+  if (lastSafe > 0) candidates.push(closeAll(s.slice(0, lastSafe)));
+
+  for (const c of candidates) {
+    try {
+      return JSON.parse(c);
+    } catch { /* next */ }
+  }
+  throw new Error("AI returned malformed JSON.");
+}
+
+async function callGatewayOnce(apiKey: string, system: string, user: string, maxTokens: number) {
   const resp = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
     method: "POST",
     headers: { "Content-Type": "application/json", "Lovable-API-Key": apiKey },
@@ -90,23 +150,35 @@ async function callGateway(apiKey: string, system: string, user: string, maxToke
   }
 
   const json: any = await resp.json();
-  const content = json?.choices?.[0]?.message?.content;
+  const choice = json?.choices?.[0];
+  const content = choice?.message?.content;
   if (!content) throw new Error("AI returned an empty response.");
+  if (typeof content !== "string") return content;
   try {
-    return typeof content === "string" ? JSON.parse(content) : content;
+    return JSON.parse(content);
   } catch {
-    // Tolerate stray prose/markdown fences around the JSON body.
-    const raw = String(content);
-    const start = raw.indexOf("{");
-    const end = raw.lastIndexOf("}");
-    if (start >= 0 && end > start) {
-      try {
-        return JSON.parse(raw.slice(start, end + 1));
-      } catch { /* fall through */ }
-    }
-    throw new Error("AI returned malformed JSON.");
+    console.warn("[ai] loose-parsing model output", { finish: choice?.finish_reason, len: content.length });
+    return parseLoose(content);
   }
 }
+
+async function callGateway(apiKey: string, system: string, user: string, maxTokens: number) {
+  try {
+    return await callGatewayOnce(apiKey, system, user, maxTokens);
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : "";
+    // Only retry on parse/empty issues, never on rate limit / credits.
+    if (!/malformed JSON|empty response/i.test(msg)) throw err;
+    console.warn("[ai] retrying after", msg);
+    return await callGatewayOnce(
+      apiKey,
+      `${system}\n\nIMPORTANT: Keep every string short. Return ONLY compact, complete, valid JSON. Never truncate.`,
+      user,
+      maxTokens,
+    );
+  }
+}
+
 
 /** Keep only structurally valid questions instead of failing the whole batch. */
 function cleanQuiz(raw: unknown) {
