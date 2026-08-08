@@ -40,41 +40,51 @@ export const QuizQuestionSchema = z.object({
 
 export const VocabEntrySchema = z.object({
   word: z.string().min(1),
-  pos: z.string().min(1),
-  hindi: z.string().min(1),
-  english: z.string().min(1),
-  synonyms: z.string().min(1),
+  pos: z.string().optional().default(""),
+  hindi: z.string().optional().default(""),
+  english: z.string().optional().default(""),
+  synonyms: z.string().optional().default(""),
   antonyms: z.string().optional().default(""),
-  usage: z.string().min(1),
+  usage: z.string().optional().default(""),
   editorial_sentence: z.string().optional().default(""),
   memory_trick: z.string().optional().default(""),
   ibps_trap: z.string().optional().default(""),
 });
 
 export const AnalysisSchema = z.object({
-  issue: z.string().min(1),
-  causes: z.array(z.string().min(1)).min(1),
-  effects: z.array(z.string().min(1)).min(1),
-  solutions: z.array(z.string().min(1)).min(1),
-  author_tone: z.string().min(1),
-  main_idea: z.string().min(1),
-  one_line_summary: z.string().min(1),
+  issue: z.string().optional().default(""),
+  causes: z.array(z.string()).optional().default([]),
+  effects: z.array(z.string()).optional().default([]),
+  solutions: z.array(z.string()).optional().default([]),
+  author_tone: z.string().optional().default(""),
+  main_idea: z.string().optional().default(""),
+  one_line_summary: z.string().optional().default(""),
   best_title: z.string().optional().default(""),
   inferences: z.array(z.string()).optional().default([]),
   facts: z.array(z.string()).optional().default([]),
 });
 
-export const PackageSchema = z.object({
+/** Everything except the quiz — produced by the "study" generation call. */
+export const StudySchema = z.object({
   title: z.string().min(1),
-  summary: z.string().min(1),
-  theme: z.string().min(1),
-  tone: z.string().min(1),
-  conclusion: z.string().min(1),
-  takeaways: z.array(z.string().min(1)).min(1),
-  analysis: AnalysisSchema,
-  vocabulary: z.array(VocabEntrySchema).min(1),
-  sbi_notes: z.array(z.object({ word: z.string().min(1), note: z.string().min(1) })).min(1),
-  quiz: z.array(QuizQuestionSchema).min(30).max(30),
+  summary: z.string().optional().default(""),
+  theme: z.string().optional().default(""),
+  tone: z.string().optional().default(""),
+  conclusion: z.string().optional().default(""),
+  takeaways: z.array(z.string()).optional().default([]),
+  analysis: AnalysisSchema.optional().default({}),
+  vocabulary: z.array(VocabEntrySchema).optional().default([]),
+  sbi_notes: z.array(z.object({ word: z.string().min(1), note: z.string().min(1) })).optional().default([]),
+});
+
+/** Quiz-only payload — produced by the RC call and the non-RC sections call. */
+export const QuizOnlySchema = z.object({
+  quiz: z.array(QuizQuestionSchema).min(1),
+});
+
+export const PackageSchema = StudySchema.extend({
+  quiz: z.array(QuizQuestionSchema).min(1),
 });
 
 export type GeneratedPackage = z.infer<typeof PackageSchema>;
+
