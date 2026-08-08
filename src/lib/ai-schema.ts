@@ -40,12 +40,12 @@ export const QuizQuestionSchema = z.object({
 
 export const VocabEntrySchema = z.object({
   word: z.string().min(1),
-  pos: z.string().min(1),
-  hindi: z.string().min(1),
-  english: z.string().min(1),
-  synonyms: z.string().min(1),
+  pos: z.string().optional().default(""),
+  hindi: z.string().optional().default(""),
+  english: z.string().optional().default(""),
+  synonyms: z.string().optional().default(""),
   antonyms: z.string().optional().default(""),
-  usage: z.string().min(1),
+  usage: z.string().optional().default(""),
   editorial_sentence: z.string().optional().default(""),
   memory_trick: z.string().optional().default(""),
   ibps_trap: z.string().optional().default(""),
