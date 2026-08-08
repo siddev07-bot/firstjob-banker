@@ -3,7 +3,7 @@ import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { z } from "zod";
 import {
   PackageSchema,
-  QuizOnlySchema,
+
   QuizQuestionSchema,
   StudySchema,
   RC_SUBTYPES,
@@ -168,7 +168,6 @@ export const generateEditorialPackage = createServerFn({ method: "POST" })
     return result.data;
   });
 
-export const QuizOnly = QuizOnlySchema;
 
 
 
